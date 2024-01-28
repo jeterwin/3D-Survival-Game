@@ -2,12 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InteractionSystem : MonoBehaviour
 {
     [Header("Raycast Settings")]
     [SerializeField] private Camera mainCamera;
     [SerializeField] private float rayLength = 1f;
+
+    [SerializeField] private Image crosshair;
+    [SerializeField] private Sprite defaultCrosshair;
+    [SerializeField] private Sprite pickableCrosshair;
 
     [Header("Raycast UI")]
     [SerializeField] private TextMeshProUGUI displayedItemName;
@@ -22,6 +27,7 @@ public class InteractionSystem : MonoBehaviour
             if(interactableItem != null)
             {
                 displayedItemName.text = interactableItem.ItemName;
+                crosshair.sprite = pickableCrosshair;
                 if(Input.GetKeyDown(KeyCode.E))
                 {
                     interactableItem.Interact();
@@ -30,11 +36,13 @@ public class InteractionSystem : MonoBehaviour
             else // Didn't hit an object with the Item script attached
             {
                 displayedItemName.text = "";
+                crosshair.sprite = defaultCrosshair;
             }
         } // Didn't hit any objects
         else
         {
             displayedItemName.text = "";
+            crosshair.sprite = defaultCrosshair;
         }
     }
     private void OnDrawGizmos()

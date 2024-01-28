@@ -1,16 +1,28 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
  
 public class InventorySystem : MonoBehaviour
 {
     public static InventorySystem Instance { get; set; }
 
+    public GameObject ItemInfoUI;
+
     [SerializeField] private Transform inventoryGrid;
 
     [field: SerializeField] private List<GameObject> slotList = new List<GameObject>();
-    [field: SerializeField] private List<string> itemList = new List<string>();
+    public List<GameObject> SlotList
+    {
+        get { return slotList; }
+    }
+    [field: SerializeField] private List<Material> itemList = new List<Material>();
+    public List<Material> ItemList
+    {
+        get { return itemList; }
+    }
+
     private GameObject itemToAdd;
     private GameObject whatSlotToEquip;
  
@@ -26,7 +38,6 @@ public class InventorySystem : MonoBehaviour
         get { return isOpen; }
     }
 
-    private bool isFull;
     public bool IsFull
     {
         get { return fullInventory(); }
@@ -48,39 +59,95 @@ public class InventorySystem : MonoBehaviour
     void Start()
     {
         isOpen = false;
-        isFull = false;
 
         PopulateSlotList();
     }
+    public void ChangeItemIndex(string materialName,  int index)
+    {
+        foreach(Material material in ItemList)
+        {
+            if(material.MaterialName == materialName)
+            {
+                itemList[itemList.IndexOf(material)].MaterialIndex = index;
+                break;
+            }
+        }
+    }
+    public void RemoveItem(string itemToRemove, int amountToRemove)
+    {
+        //These are the materials that we've fully depleted and we want to remove after the foreach
+        List<Material> eliminatedMaterials = new();
 
+        foreach(Material material in itemList)
+        {
+            if(material.MaterialName == itemToRemove)
+            {
+                material.MaterialAmount -= amountToRemove;
+
+                if(material.MaterialAmount <= 0)
+                {
+                    eliminatedMaterials.Add(material);
+                    Destroy(slotList[material.MaterialIndex].transform.GetChild(0).gameObject);
+                }
+                else
+                {
+                    slotList[material.MaterialIndex].GetComponentInChildren<TextMeshProUGUI>().text =
+                        itemList[itemList.IndexOf(material)].MaterialAmount.ToString() + "x";
+                }
+                break;
+            }
+        }
+        if(eliminatedMaterials.Count == 0) { return; }
+
+        foreach(Material material in eliminatedMaterials)
+        {
+            ItemList.Remove(material);
+        }
+    }
     private void PopulateSlotList()
     {
         foreach(Transform child in inventoryGrid)
         {
             slotList.Add(child.gameObject);
-
         }
     }
-    public void AddToInventory(string itemName)
+    public void AddToInventory(Material material)
     {
+        //If the item is already in the inventory increment the amount of materials by 1
+        foreach (Material item in itemList)
+        {
+            if (item.MaterialName == material.MaterialName)
+            {
+                itemList[itemList.IndexOf(item)].MaterialAmount += 1;
+                slotList[item.MaterialIndex].GetComponentInChildren<TextMeshProUGUI>().text =
+                    itemList[itemList.IndexOf(item)].MaterialAmount + "x";
+                return;
+            }
+        }
+        //Else equip it to the next slot
         whatSlotToEquip = findNextFreeSlot();
-        itemToAdd = Instantiate(Resources.Load<GameObject>(itemName), 
+        if (whatSlotToEquip == null) return;
+
+        itemToAdd = Instantiate(Resources.Load<GameObject>(material.MaterialName),
             whatSlotToEquip.transform.position, whatSlotToEquip.transform.rotation);
         itemToAdd.transform.SetParent(whatSlotToEquip.transform);
 
-        itemList.Add(itemName);
+        material.MaterialIndex = slotList.IndexOf(whatSlotToEquip);
+        itemList.Add(material);
     }
 
     private GameObject findNextFreeSlot()
     {
         foreach(GameObject slot in slotList)
         {
+            //If the game object has no child objects then it has no items equipped on the slot
             if(slot.transform.childCount == 0)
             {
                 return slot;
             }
         }
-        return new GameObject();
+
+        return null;
     }
 
     private bool fullInventory()
@@ -116,4 +183,11 @@ public class InventorySystem : MonoBehaviour
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
     }
+}
+[Serializable]
+public class Material
+{
+    public string MaterialName;
+    public int MaterialAmount;
+    public int MaterialIndex;
 }

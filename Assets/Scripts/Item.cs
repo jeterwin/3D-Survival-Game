@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class Item : IInteractable
 {
-    [SerializeField] private string itemName = "";
+    [SerializeField] private Material material;
+    //[SerializeField] private string itemName = "";
     public override string ItemName 
     {
-        get { return itemName; }
+        get { return material.MaterialName; }
     }
 
     public override void Interact()
@@ -15,7 +16,7 @@ public class Item : IInteractable
         //Pickup logic
         if(InventorySystem.Instance.IsFull)  { return; }  
 
-        InventorySystem.Instance.AddToInventory(ItemName);
+        InventorySystem.Instance.AddToInventory(material);
         Destroy(gameObject);
     }
 }

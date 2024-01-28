@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Craftable Item", menuName = "Craftable Item")]
 public class Craftable : ScriptableObject
 {
-    public string ItemName = "";
+    public Material material;
     
     public List<NeededMaterials> MaterialsNeeded = new List<NeededMaterials>();
 

@@ -21,9 +21,11 @@ public class ItemSlot : MonoBehaviour, IDropHandler
         //if there is not item already then set our item.
         if (!Item)
         {
- 
             DragDrop.itemBeingDragged.transform.SetParent(transform);
             DragDrop.itemBeingDragged.transform.localPosition = new Vector2(0, 0);
+            string itemName = Item.name.Replace("(Clone)", "");
+            InventorySystem.Instance.ChangeItemIndex(itemName, 
+                InventorySystem.Instance.SlotList.IndexOf(transform.gameObject));
         }
     }
 }

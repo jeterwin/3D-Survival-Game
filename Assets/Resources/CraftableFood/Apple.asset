@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 370205d3d6480ee4ca2d79126047510e, type: 3}
   m_Name: Apple
   m_EditorClassIdentifier: 
-  ItemName: Apple
+  material:
+    MaterialName: Apple
+    MaterialAmount: 1
+    MaterialIndex: 0
   MaterialsNeeded:
   - Material: 0
-    AmountOfMaterial: 2
-  - Material: 1
     AmountOfMaterial: 1
   ItemImage: {fileID: 21300000, guid: 5d9ba4e7d0964044ea54abe409d81dfd, type: 3}

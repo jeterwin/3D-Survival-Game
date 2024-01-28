@@ -88,6 +88,9 @@ public class InventorySystem : MonoBehaviour
                 {
                     eliminatedMaterials.Add(material);
                     Destroy(slotList[material.MaterialIndex].transform.GetChild(0).gameObject);
+                    //In case you deleted an item, it was surely hovered over, so disable the 
+                    //item info UI
+                    ItemInfoUI.SetActive(false);
                 }
                 else
                 {
@@ -129,8 +132,8 @@ public class InventorySystem : MonoBehaviour
         if (whatSlotToEquip == null) return;
 
         itemToAdd = Instantiate(Resources.Load<GameObject>(material.MaterialName),
-            whatSlotToEquip.transform.position, whatSlotToEquip.transform.rotation);
-        itemToAdd.transform.SetParent(whatSlotToEquip.transform);
+            Vector3.zero, whatSlotToEquip.transform.rotation);
+        itemToAdd.transform.SetParent(whatSlotToEquip.transform, false);
 
         material.MaterialIndex = slotList.IndexOf(whatSlotToEquip);
         itemList.Add(material);

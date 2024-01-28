@@ -57,7 +57,7 @@ public class CraftingSystem : MonoBehaviour
             //Get the transform for the prefab for modifications
             Transform GOTransform = GO.transform;
             //Set the object's parent to the crafting grid
-            GOTransform.SetParent(itemGrid);
+            GOTransform.SetParent(itemGrid, false);
             //Find the image and text and set them to the item's name and image
             GOTransform.Find("Item").Find("ItemImagePrefab").GetComponent<Image>().sprite = item.ItemImage;
 
@@ -68,7 +68,7 @@ public class CraftingSystem : MonoBehaviour
             foreach (NeededMaterials material in item.MaterialsNeeded)
             {
                 GameObject textGO = Instantiate(MaterialNamePrefab);
-                textGO.transform.SetParent(MaterialsGridTransform);
+                textGO.transform.SetParent(MaterialsGridTransform, false);
                 textGO.GetComponent<TextMeshProUGUI>().text =
                     material.AmountOfMaterial + " " + material.Material.ToString();
             }
@@ -90,14 +90,14 @@ public class CraftingSystem : MonoBehaviour
                     hasMaterial = true;
                     if(material.AmountOfMaterial > _item.MaterialAmount)
                     {
-                        Debug.Log("Not enough materials!!");
+                        Debug.Log("Not enough materials!");
                         return;
                     }
                 }
             }
             if(hasMaterial == false)
             {
-                Debug.Log("Not enough materials!! index -1");
+                Debug.Log("Some material doesn't exist in the inventory!");
                 return;
             }
         }
@@ -120,10 +120,6 @@ public class CraftingSystem : MonoBehaviour
         {
             OpenCrafting();
         }
-    }
-    private void craftAnyItem()
-    {
-
     }
     public void CloseCrafting()
     {

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
  
-public class InventoryItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class InventoryItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
 {
     // --- Is this item trashable --- //
     [SerializeField] private bool isTrashable;
@@ -20,7 +20,10 @@ public class InventoryItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [SerializeField] private string thisFunctionality;
  
     // --- Consumption --- //
-    public bool isConsumable;
+    [SerializeField] private bool isConsumable;
+    [SerializeField] private int hydrationAmount = 0;
+    [SerializeField] private int hungerAmount = 0;
+    [SerializeField] private int healthAmount = 0;
  
     private void Start()
     {
@@ -31,7 +34,7 @@ public class InventoryItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         itemInfoUI_itemDescription = itemInfoUITransform.Find("itemDescription").GetComponent<TextMeshProUGUI>();
         itemInfoUI_itemFunctionality = itemInfoUITransform.Find("itemFunctionality").GetComponent<TextMeshProUGUI>();
     }
- 
+    
     // Triggered when the mouse enters into the area of the item that has this script.
     public void OnPointerEnter(PointerEventData eventData)
     {
@@ -47,4 +50,16 @@ public class InventoryItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         itemInfoUI.SetActive(false);
     }
 
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if(Input.GetKeyDown(KeyCode.Mouse1) && isConsumable)
+        {
+            //After using the item, reduce it's quantity by 0 and give the necessary stats
+            GameObject clickedObject = eventData.pointerPressRaycast.gameObject;
+            string itemName = clickedObject.transform.parent.name.Replace("(Clone)", "");
+            InventorySystem.Instance.RemoveItem(itemName, 1);
+            HealthSystem.Instance.Regen(hungerAmount, healthAmount, hydrationAmount);
+            //InventorySystem.Instance.RemoveItem()
+        }
+    }
 }

@@ -23,8 +23,8 @@ public class ItemSlot : MonoBehaviour, IDropHandler
         {
             DragDrop.itemBeingDragged.transform.SetParent(transform);
             DragDrop.itemBeingDragged.transform.localPosition = new Vector2(0, 0);
-            string itemName = Item.name.Replace("(Clone)", "");
-            InventorySystem.Instance.ChangeItemIndex(itemName, 
+            //string itemName = Item.name.Replace("(Clone)", "");
+            InventorySystem.Instance.ChangeItemIndex(Item.name, 
                 InventorySystem.Instance.SlotList.IndexOf(transform.gameObject));
         }
     }

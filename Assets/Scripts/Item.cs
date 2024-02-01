@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Item : IInteractable
 {
-    [SerializeField] private Material material;
+    [SerializeField] private MaterialStruct material;
     //[SerializeField] private string itemName = "";
     public override string ItemName 
     {

@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Craftable Item", menuName = "Craftable Item")]
 public class Craftable : ScriptableObject
 {
-    public Material material;
+    public MaterialStruct material;
     
     public List<NeededMaterials> MaterialsNeeded = new List<NeededMaterials>();
 
@@ -22,5 +22,7 @@ public class NeededMaterials
 public enum CraftingMaterials
 {
     Stone,
-    Wood
+    Wood,
+    Feather,
+    String
 }

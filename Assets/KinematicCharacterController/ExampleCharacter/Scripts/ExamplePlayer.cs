@@ -53,26 +53,16 @@ namespace KinematicCharacterController.Examples
             float mouseLookAxisRight = Input.GetAxisRaw(MouseXInput);
             Vector3 lookInputVector = new Vector3(mouseLookAxisRight, mouseLookAxisUp, 0f);
 
-            // Prevent moving the camera while the cursor isn't locked
+            // Prevent moving the camera while the cursor isn't locked, maybe will stop character
+            // from moving too
             if (Cursor.lockState != CursorLockMode.Locked)
             {
                 lookInputVector = Vector3.zero;
             }
 
-            // Input for zooming the camera (disabled in WebGL because it can cause problems)
-            float scrollInput = -Input.GetAxis(MouseScrollInput);
-#if UNITY_WEBGL
-        scrollInput = 0f;
-#endif
-
             // Apply inputs to the camera
-            CharacterCamera.UpdateWithInput(Time.deltaTime, scrollInput, lookInputVector);
+            CharacterCamera.UpdateWithInput(Time.deltaTime, 0, lookInputVector);
 
-            // Handle toggling zoom level
-            if (Input.GetMouseButtonDown(1))
-            {
-                CharacterCamera.TargetDistance = (CharacterCamera.TargetDistance == 0f) ? CharacterCamera.DefaultDistance : 0f;
-            }
         }
 
         private void HandleCharacterInput()

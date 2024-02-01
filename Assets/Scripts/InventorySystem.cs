@@ -8,7 +8,12 @@ public class InventorySystem : MonoBehaviour
 {
     public static InventorySystem Instance { get; set; }
 
-    public GameObject ItemInfoUI;
+    [SerializeField] private GameObject itemInfoUI;
+
+    public GameObject ItemInfoUI
+    {
+        get { return itemInfoUI; }
+    }
 
     [SerializeField] private Transform inventoryGrid;
 
@@ -17,14 +22,12 @@ public class InventorySystem : MonoBehaviour
     {
         get { return slotList; }
     }
-    [field: SerializeField] private List<Material> itemList = new List<Material>();
-    public List<Material> ItemList
+
+    [field: SerializeField] private List<MaterialStruct> itemList = new List<MaterialStruct>();
+    public List<MaterialStruct> ItemList
     {
         get { return itemList; }
     }
-
-    private GameObject itemToAdd;
-    private GameObject whatSlotToEquip;
  
     [SerializeField] private GameObject inventoryScreenUI;
     public GameObject InventoryScreenUI
@@ -43,6 +46,8 @@ public class InventorySystem : MonoBehaviour
         get { return fullInventory(); }
     }
  
+    private GameObject itemToAdd;
+    private GameObject whatSlotToEquip;
  
     private void Awake()
     {
@@ -64,7 +69,7 @@ public class InventorySystem : MonoBehaviour
     }
     public void ChangeItemIndex(string materialName,  int index)
     {
-        foreach(Material material in ItemList)
+        foreach(MaterialStruct material in ItemList)
         {
             if(material.MaterialName == materialName)
             {
@@ -76,9 +81,9 @@ public class InventorySystem : MonoBehaviour
     public void RemoveItem(string itemToRemove, int amountToRemove)
     {
         //These are the materials that we've fully depleted and we want to remove after the foreach
-        List<Material> eliminatedMaterials = new();
+        List<MaterialStruct> eliminatedMaterials = new();
 
-        foreach(Material material in itemList)
+        foreach(MaterialStruct material in itemList)
         {
             if(material.MaterialName == itemToRemove)
             {
@@ -90,7 +95,7 @@ public class InventorySystem : MonoBehaviour
                     Destroy(slotList[material.MaterialIndex].transform.GetChild(0).gameObject);
                     //In case you deleted an item, it was surely hovered over, so disable the 
                     //item info UI
-                    ItemInfoUI.SetActive(false);
+                    itemInfoUI.SetActive(false);
                 }
                 else
                 {
@@ -102,7 +107,7 @@ public class InventorySystem : MonoBehaviour
         }
         if(eliminatedMaterials.Count == 0) { return; }
 
-        foreach(Material material in eliminatedMaterials)
+        foreach(MaterialStruct material in eliminatedMaterials)
         {
             ItemList.Remove(material);
         }
@@ -114,10 +119,10 @@ public class InventorySystem : MonoBehaviour
             slotList.Add(child.gameObject);
         }
     }
-    public void AddToInventory(Material material)
+    public void AddToInventory(MaterialStruct material)
     {
         //If the item is already in the inventory increment the amount of materials by 1
-        foreach (Material item in itemList)
+        foreach (MaterialStruct item in itemList)
         {
             if (item.MaterialName == material.MaterialName)
             {
@@ -133,6 +138,9 @@ public class InventorySystem : MonoBehaviour
 
         itemToAdd = Instantiate(Resources.Load<GameObject>(material.MaterialName),
             Vector3.zero, whatSlotToEquip.transform.rotation);
+        //Replace the (Clone) name given to the GO at instantiation time now rather than replace it
+        //for every goddamn time that is needed
+        itemToAdd.name = itemToAdd.name.Replace("(Clone)", "");
         itemToAdd.transform.SetParent(whatSlotToEquip.transform, false);
 
         material.MaterialIndex = slotList.IndexOf(whatSlotToEquip);
@@ -177,6 +185,8 @@ public class InventorySystem : MonoBehaviour
         isOpen = false;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+        ScriptManagers.Instance.equipSystem.enabled = true;
+        ScriptManagers.Instance.craftingSystem.enabled = true;
     }
 
     private void OpenInventory()
@@ -185,10 +195,12 @@ public class InventorySystem : MonoBehaviour
         isOpen = true;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+        ScriptManagers.Instance.equipSystem.enabled = false;
+        ScriptManagers.Instance.craftingSystem.enabled = false;
     }
 }
 [Serializable]
-public class Material
+public class MaterialStruct
 {
     public string MaterialName;
     public int MaterialAmount;

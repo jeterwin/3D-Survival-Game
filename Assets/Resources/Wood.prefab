@@ -102,10 +102,10 @@ MonoBehaviour:
   thisName: Wood
   thisDescription: Wood from some chopped tree
   thisFunctionality: '[Used for crafting]'
-  isConsumable: 1
-  hydrationAmount: 10
-  hungerAmount: 5
-  healthAmount: 1
+  isConsumable: 0
+  hydrationAmount: 0
+  hungerAmount: 0
+  healthAmount: 0
 --- !u!1001 &3073429116164387443
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -273,7 +273,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: e0eac6b76fdd842e88a7f8c75ecffaf4,
+      objectReference: {fileID: 21300000, guid: 0e1ccb64303778e4081913a6d9cca677,
         type: 3}
     - target: {fileID: 7843930081024363407, guid: 375fa792c0465aa4bb875cca285f60c0,
         type: 3}

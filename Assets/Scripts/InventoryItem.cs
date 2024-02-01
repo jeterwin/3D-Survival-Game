@@ -56,7 +56,8 @@ public class InventoryItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         {
             //After using the item, reduce it's quantity by 0 and give the necessary stats
             GameObject clickedObject = eventData.pointerPressRaycast.gameObject;
-            string itemName = clickedObject.transform.parent.name.Replace("(Clone)", "");
+
+            string itemName = clickedObject.transform.parent.name;
             InventorySystem.Instance.RemoveItem(itemName, 1);
             HealthSystem.Instance.Regen(hungerAmount, healthAmount, hydrationAmount);
             //InventorySystem.Instance.RemoveItem()

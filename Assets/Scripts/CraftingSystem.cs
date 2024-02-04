@@ -112,6 +112,8 @@ public class CraftingSystem : MonoBehaviour
     }
     void Update()
     {
+        if(PauseScript.Instance.IsPaused) { return; }
+
         if (Input.GetKeyDown(KeyCode.C) && IsOpen)
         {
             CloseCrafting();
@@ -127,7 +129,6 @@ public class CraftingSystem : MonoBehaviour
         isOpen = !isOpen;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
-        ScriptManagers.Instance.equipSystem.enabled = true;
         ScriptManagers.Instance.inventorySystem.enabled = true;
     }
 
@@ -137,7 +138,6 @@ public class CraftingSystem : MonoBehaviour
         isOpen = !isOpen;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
-        ScriptManagers.Instance.equipSystem.enabled = false;
         ScriptManagers.Instance.inventorySystem.enabled = false;
     }
 }

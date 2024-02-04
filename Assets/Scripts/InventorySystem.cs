@@ -3,10 +3,28 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
  
 public class InventorySystem : MonoBehaviour
 {
+    #region Variables
     public static InventorySystem Instance { get; set; }
+
+    [SerializeField] private List<GameObject> equippableItems;
+    [SerializeField] private GameObject equippedItemGO;
+    [SerializeField] private Transform itemHolder;
+
+    [SerializeField] private Image[] circleImages;
+    [SerializeField] private TextMeshProUGUI[] circleTexts;
+    //Will change the colors of the number of the equipped item to the respective colors
+    [SerializeField] private Color32 textEquippedColor;
+    [SerializeField] private Color32 textUnequippedColor;
+    //Will change the colors of the circle of the equipped item to the respective colors
+    [SerializeField] private Color32 circleEquippedColor;
+    [SerializeField] private Color32 circleUnequippedColor;
+
+    private int currentEquippedSlot = 0;
+    private int lastEquippedSlot = 0;
 
     [SerializeField] private GameObject itemInfoUI;
 
@@ -59,13 +77,77 @@ public class InventorySystem : MonoBehaviour
         {
             Instance = this;
         }
-    } 
- 
+    }
+
+    #endregion
     void Start()
     {
         isOpen = false;
 
         PopulateSlotList();
+    }
+    void Update()
+    {
+        if(PauseScript.Instance.IsPaused) { return; }
+        //Preferred this over n if statements
+        lastEquippedSlot = currentEquippedSlot;
+
+        for (int i = 0; i < circleImages.Length + 1; i++)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+            {
+                //If Alpha1 (1) + i is at least (1) or at maximum (5) then we indeed pressed a button
+                //for our inventory slots
+                if (KeyCode.Alpha1 + i <= KeyCode.Alpha5 && KeyCode.Alpha1 + i >= KeyCode.Alpha1)
+                {
+                    currentEquippedSlot = i;
+                }
+            }
+        }
+
+        if (Input.GetAxis("Mouse ScrollWheel") > 0f)
+        {
+            if (currentEquippedSlot >= circleImages.Length - 1)
+                currentEquippedSlot = 0;
+            else
+                currentEquippedSlot += 1;
+        }
+        if (Input.GetAxis("Mouse ScrollWheel") < 0f)
+        {
+            if (currentEquippedSlot <= 0)
+                currentEquippedSlot = circleImages.Length - 1;
+            else
+                currentEquippedSlot -= 1;
+        }
+
+        if (lastEquippedSlot != currentEquippedSlot)
+        {
+            changeEquippedSlot(currentEquippedSlot);
+        }
+
+        HandleInventory();
+    }
+    private void changeEquippedSlot(int slot)
+    {
+        //if(SlotList[slot].transform.childCount == 0) { return; }
+
+        //Set the current slot colors accordingly
+        circleTexts[currentEquippedSlot].color = textEquippedColor;
+        circleImages[currentEquippedSlot].color = circleEquippedColor;
+
+        //And set the last equipped slot colors accordingly (instead of running a for loop)
+        circleTexts[lastEquippedSlot].color = circleUnequippedColor;
+        circleTexts[lastEquippedSlot].color = textUnequippedColor;
+
+        //If we had a previously equipped item the disable it
+        if(equippedItemGO != null)
+            equippedItemGO.SetActive(false);
+
+        equippedItemGO = equippableItems[slot];
+
+        //If we actually HAVE an item now, then enable it
+        if(equippedItemGO != null)
+            equippedItemGO.SetActive(true);
     }
     public void ChangeItemIndex(string materialName,  int index)
     {
@@ -73,10 +155,46 @@ public class InventorySystem : MonoBehaviour
         {
             if(material.MaterialName == materialName)
             {
+                int oldIndex = itemList[itemList.IndexOf(material)].MaterialIndex;
                 itemList[itemList.IndexOf(material)].MaterialIndex = index;
+
+                equippableItems[index] = equippableItems[oldIndex];
+                equippableItems[oldIndex] = null;
+
+                if(oldIndex == currentEquippedSlot)
+                {
+                    equippedItemGO.SetActive(false);
+                }
+                if(index == currentEquippedSlot)
+                {
+                    equippedItemGO = equippableItems[index];
+                    equippedItemGO.SetActive(true);
+                }
                 break;
             }
         }
+    }
+    public void InstantiateItem(int slot)
+    {
+        //Somehow make pooling out of all of them instead of instantiate one by one
+        GameObject newItem = Instantiate(Resources.Load<GameObject>("HoldableItems/"
+            + SlotList[slot].transform.GetChild(0).name)
+            );
+        //De-activate the item on instantiation, replace the annoying text name, chil it to the
+        //itemHolder transform which is on the player's camera, add the item to the
+        //equippable items list for easier, set the later to Items so only the secondary camera
+        //can see the item (because motion blur)
+        //If our current slot is the same as the picked up item, then enable it
+        if(currentEquippedSlot == slot)
+        {
+            equippedItemGO = newItem;
+        }
+        newItem.SetActive(currentEquippedSlot == slot);
+
+        newItem.name = newItem.name.Replace("(Clone)", "");
+        newItem.transform.SetParent(itemHolder, false);
+        equippableItems[slot] = newItem;
+        //newItem.layer = LayerMask.NameToLayer("Items");
     }
     public void RemoveItem(string itemToRemove, int amountToRemove)
     {
@@ -109,8 +227,17 @@ public class InventorySystem : MonoBehaviour
 
         foreach(MaterialStruct material in eliminatedMaterials)
         {
+            if(material.MaterialIndex <= 4)
+            {
+                UninstantiateItem(material.MaterialIndex);
+            }
             ItemList.Remove(material);
         }
+    }
+    public void UninstantiateItem(int slot)
+    {
+        Destroy(equippableItems[slot]);
+        equippableItems[slot] = null;
     }
     private void PopulateSlotList()
     {
@@ -143,7 +270,13 @@ public class InventorySystem : MonoBehaviour
         itemToAdd.name = itemToAdd.name.Replace("(Clone)", "");
         itemToAdd.transform.SetParent(whatSlotToEquip.transform, false);
 
-        material.MaterialIndex = slotList.IndexOf(whatSlotToEquip);
+        int itemSlotIndex = slotList.IndexOf(whatSlotToEquip);
+        material.MaterialIndex = itemSlotIndex;
+        //No. of quick slots starting from 0
+        if(itemSlotIndex <= 4)
+        {
+            InstantiateItem(itemSlotIndex);
+        }
         itemList.Add(material);
     }
 
@@ -166,9 +299,8 @@ public class InventorySystem : MonoBehaviour
         return itemList.Count + 1 > slotList.Count;
     }
 
-    void Update()
+    private void HandleInventory()
     {
- 
         if (Input.GetKeyDown(KeyCode.I) && !isOpen)
         {
             OpenInventory();
@@ -185,7 +317,6 @@ public class InventorySystem : MonoBehaviour
         isOpen = false;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
-        ScriptManagers.Instance.equipSystem.enabled = true;
         ScriptManagers.Instance.craftingSystem.enabled = true;
     }
 
@@ -195,7 +326,6 @@ public class InventorySystem : MonoBehaviour
         isOpen = true;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
-        ScriptManagers.Instance.equipSystem.enabled = false;
         ScriptManagers.Instance.craftingSystem.enabled = false;
     }
 }

@@ -24,6 +24,6 @@ public class MoonModule : DNModuleBase
     public override void UpdateModule(float intensity)
     {
         moon.color = moonColor.Evaluate(1 - intensity);
-        moon.intensity = (1 - intensity) * baseIntensity + 0.05f;
+        moon.intensity = (1 - intensity) * baseIntensity;
     }
 }

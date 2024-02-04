@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class InteractionSystem : MonoBehaviour
 {
+    public static InteractionSystem Instance;
+
     [Header("Raycast Settings")]
     [SerializeField] private Camera mainCamera;
     [SerializeField] private float rayLength = 1f;
@@ -17,10 +19,13 @@ public class InteractionSystem : MonoBehaviour
     [Header("Raycast UI")]
     [SerializeField] private TextMeshProUGUI displayedItemName;
 
+    private void Awake()
+    {
+        Instance = this;
+    }
     private void Update()
     {
         RaycastHit hit;
-        //Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         if(Physics.Raycast(mainCamera.transform.position, mainCamera.transform.forward, out hit, rayLength))
         {
             IInteractable interactableItem = hit.transform.GetComponent<IInteractable>();

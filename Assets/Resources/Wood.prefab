@@ -100,7 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isTrashable: 1
   thisName: Wood
-  thisDescription: Wood from some chopped tree
+  thisDescription: Wood from some chopped tree.
   thisFunctionality: '[Used for crafting]'
   isConsumable: 0
   hydrationAmount: 0
@@ -275,6 +275,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 0e1ccb64303778e4081913a6d9cca677,
         type: 3}
+    - target: {fileID: 4782447164017021738, guid: 375fa792c0465aa4bb875cca285f60c0,
+        type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 7843930081024363407, guid: 375fa792c0465aa4bb875cca285f60c0,
         type: 3}
       propertyPath: m_SizeDelta.x

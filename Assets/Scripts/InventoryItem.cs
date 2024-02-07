@@ -5,26 +5,43 @@ using UnityEngine.UI;
  
 public class InventoryItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
 {
-    // --- Is this item trashable --- //
+    // --- If the item can be disposed of --- //
     [SerializeField] private bool isTrashable;
  
     // --- Item Info UI --- //
     private GameObject itemInfoUI;
- 
+
+    [Header("Durability Stats")]
+    [SerializeField] private Image durabilityBar;
+    [SerializeField] private Gradient durabilityGradient;
+    public Image DurabilityBar
+    {
+        get { return durabilityBar; } 
+    }
+    public Gradient DurabilityGradient
+    {
+        get { return  durabilityGradient; }
+    }
+    [Space(5)]
+
+    [Header("Item UI")]
     private TextMeshProUGUI itemInfoUI_itemName;
     private TextMeshProUGUI itemInfoUI_itemDescription;
     private TextMeshProUGUI itemInfoUI_itemFunctionality;
- 
+    [Space(5)]
+        
+    [Header("Item UI Info")]
     [SerializeField] private string thisName;
     [SerializeField] private string thisDescription;
     [SerializeField] private string thisFunctionality;
+    [Space(5)]
  
-    // --- Consumption --- //
+    [Header("Consumable Item Stats")]
     [SerializeField] private bool isConsumable;
     [SerializeField] private int hydrationAmount = 0;
     [SerializeField] private int hungerAmount = 0;
     [SerializeField] private int healthAmount = 0;
- 
+    [SerializeField] private int warmnessAmount = 0;
     private void Start()
     {
         itemInfoUI = InventorySystem.Instance.ItemInfoUI;
@@ -59,8 +76,7 @@ public class InventoryItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
             string itemName = clickedObject.transform.parent.name;
             InventorySystem.Instance.RemoveItem(itemName, 1);
-            HealthSystem.Instance.Regen(hungerAmount, healthAmount, hydrationAmount);
-            //InventorySystem.Instance.RemoveItem()
+            HealthSystem.Instance.Regen(hungerAmount, healthAmount, hydrationAmount, warmnessAmount);
         }
     }
 }

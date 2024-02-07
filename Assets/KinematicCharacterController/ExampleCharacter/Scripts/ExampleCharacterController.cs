@@ -42,6 +42,12 @@ namespace KinematicCharacterController.Examples
 
     public class ExampleCharacterController : MonoBehaviour, ICharacterController
     {
+        public static ExampleCharacterController Instance;
+        private PlayerCharacterInputs rawInputs;
+        public PlayerCharacterInputs RawInputs
+        {
+            get { return rawInputs; }
+        }
         public KinematicCharacterMotor Motor;
 
         [Header("Stable Movement")]
@@ -76,12 +82,20 @@ namespace KinematicCharacterController.Examples
         private Collider[] _probedColliders = new Collider[8];
         private RaycastHit[] _probedHits = new RaycastHit[8];
         private Vector3 _moveInputVector;
+        public Vector3 MoveInputVector
+        {
+            get { return _moveInputVector; }
+        }
         private Vector3 _lookInputVector;
         private bool _jumpRequested = false;
         private bool _jumpConsumed = false;
         private bool _jumpedThisFrame = false;
         private float _timeSinceJumpRequested = Mathf.Infinity;
         private float _timeSinceLastAbleToJump = 0f;
+        public float TimeSinceLastAbleToJump
+        {
+            get { return _timeSinceLastAbleToJump; }
+        }
         private Vector3 _internalVelocityAdd = Vector3.zero;
         private bool _shouldBeCrouching = false;
         private bool _isCrouching = false;
@@ -96,6 +110,8 @@ namespace KinematicCharacterController.Examples
 
             // Assign the characterController to the motor
             Motor.CharacterController = this;
+
+            Instance = this;
         }
 
         /// <summary>
@@ -142,6 +158,7 @@ namespace KinematicCharacterController.Examples
         /// </summary>
         public void SetInputs(ref PlayerCharacterInputs inputs)
         {
+            rawInputs = inputs;
             // Clamp input
             Vector3 moveInputVector = Vector3.ClampMagnitude(new Vector3(inputs.MoveAxisRight, 0f, inputs.MoveAxisForward), 1f);
 

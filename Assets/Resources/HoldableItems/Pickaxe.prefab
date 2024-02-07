@@ -120,6 +120,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   material:
-    MaterialName: Stone
+    MaterialName: Pickaxe
     MaterialAmount: 1
     MaterialIndex: 0
+    IsStackable: 0

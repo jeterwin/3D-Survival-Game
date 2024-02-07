@@ -1,13 +1,25 @@
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public abstract class UtilityItem : MonoBehaviour
 {
+    public InventoryItem inventoryItem;
+
+    [SerializeField] private AudioClip swingSFX;
+    [SerializeField] private AudioClip hitSFX;
+
     [SerializeField] private MeshCollider meshCollider;
+
+    private const string triggerName = "Used";
+
+    private AudioSource audioSource;
     public MeshCollider MeshCollider
     {
         get { return meshCollider; } 
     }
+
+    [SerializeField] private float maxItemDurability = 100f;
 
     [SerializeField] private int itemDurability = 100;
 
@@ -25,35 +37,42 @@ public abstract class UtilityItem : MonoBehaviour
     }
 
     [SerializeField] private Animator animator;
-    
+
+    private void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
+
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Mouse0))
+        if(Input.GetKeyDown(KeyCode.Mouse0) && !animator.GetCurrentAnimatorStateInfo(0).IsName("Swing"))
         {
-            AnimationEvent_SetTrigger();
+            SetBool();
+
+            audioSource.PlayOneShot(swingSFX);
         }
     }
-    private void AnimationEvent_SetTrigger()
+    private void SetBool()
     {
-        animator.SetTrigger("Used");
+        animator.SetBool(triggerName, true);
     }
     private void AnimationEvent_ResetTrigger()
     {
-        animator.ResetTrigger("Used");
+        animator.SetBool(triggerName, false);
     }
     public abstract void AnimationEvent_EnableCollider();
 
     public void TakeDamage(int damage)
     {
+        audioSource.PlayOneShot(hitSFX);
         itemDurability -= damage;
+        float durabilityPercentage = itemDurability / maxItemDurability;
+        inventoryItem.DurabilityBar.fillAmount = durabilityPercentage;
+        inventoryItem.DurabilityBar.color = inventoryItem.DurabilityGradient.Evaluate(durabilityPercentage);
+
         if(itemDurability <= 0)
         {
-            destroyItem();
+            InventorySystem.Instance.RemoveItem(transform.name, 1);
         }
-    }
-
-    private void destroyItem()
-    {
-        InventorySystem.Instance.RemoveItem(transform.name, 1);
     }
 }

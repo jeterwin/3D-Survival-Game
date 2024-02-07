@@ -16,6 +16,7 @@ MonoBehaviour:
     MaterialName: Stone Axe
     MaterialAmount: 1
     MaterialIndex: 0
+    IsStackable: 0
   MaterialsNeeded:
   - Material: 1
     AmountOfMaterial: 3

@@ -30,13 +30,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2923964501126204448}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.02486423, y: -0.7841459, z: -0.13161898, w: 0.6059484}
-  m_LocalPosition: {x: -0.011, y: -0.076, z: 0.036}
+  m_LocalRotation: {x: -0.02151696, y: -0.78443485, z: -0.12741707, w: 0.60660034}
+  m_LocalPosition: {x: 0.3110005, y: -0.3409996, z: 0.4419996}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: -13.683, y: -103.754, z: -7.125}
+  m_LocalEulerAnglesHint: {x: -13.062, y: -103.754, z: -7.125}
 --- !u!33 &1472686978280823103
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -120,7 +120,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4a4600b1e8a97e49a82501fd3c23215, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inventoryItem: {fileID: 0}
   meshCollider: {fileID: 5943509591686414958}
+  maxItemDurability: 100
   itemDurability: 100
   selfDamagePerHit: 25
   enemyDamage: 0

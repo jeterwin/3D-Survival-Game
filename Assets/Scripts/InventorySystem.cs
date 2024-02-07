@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,16 +12,23 @@ public class InventorySystem : MonoBehaviour
     public static InventorySystem Instance { get; set; }
 
     [SerializeField] private List<GameObject> equippableItems;
+
     [SerializeField] private GameObject equippedItemGO;
+
     [SerializeField] private Transform itemHolder;
 
+
     [SerializeField] private Image[] circleImages;
+
     [SerializeField] private TextMeshProUGUI[] circleTexts;
+
     //Will change the colors of the number of the equipped item to the respective colors
     [SerializeField] private Color32 textEquippedColor;
+
     [SerializeField] private Color32 textUnequippedColor;
     //Will change the colors of the circle of the equipped item to the respective colors
     [SerializeField] private Color32 circleEquippedColor;
+
     [SerializeField] private Color32 circleUnequippedColor;
 
     private int currentEquippedSlot = 0;
@@ -178,8 +186,11 @@ public class InventorySystem : MonoBehaviour
     {
         //Somehow make pooling out of all of them instead of instantiate one by one
         GameObject newItem = Instantiate(Resources.Load<GameObject>("HoldableItems/"
-            + SlotList[slot].transform.GetChild(0).name)
-            );
+            + SlotList[slot].transform.GetChild(0).name.Replace("1", string.Empty)));
+
+        UtilityItem utilityItem = newItem.GetComponent<UtilityItem>();
+        if(utilityItem != null)
+            utilityItem.inventoryItem = slotList[slot].GetComponentInChildren<InventoryItem>();
         //De-activate the item on instantiation, replace the annoying text name, chil it to the
         //itemHolder transform which is on the player's camera, add the item to the
         //equippable items list for easier, set the later to Items so only the secondary camera
@@ -191,7 +202,10 @@ public class InventorySystem : MonoBehaviour
         }
         newItem.SetActive(currentEquippedSlot == slot);
 
-        newItem.name = newItem.name.Replace("(Clone)", "");
+        newItem.name = newItem.name.Replace("(Clone)", string.Empty);
+
+        checkForDuplicates(newItem);
+
         newItem.transform.SetParent(itemHolder, false);
         equippableItems[slot] = newItem;
         //newItem.layer = LayerMask.NameToLayer("Items");
@@ -248,36 +262,66 @@ public class InventorySystem : MonoBehaviour
     }
     public void AddToInventory(MaterialStruct material)
     {
-        //If the item is already in the inventory increment the amount of materials by 1
-        foreach (MaterialStruct item in itemList)
+        MaterialStruct materialCopy = new();
+        materialCopy.MaterialIndex = material.MaterialIndex;
+        materialCopy.MaterialName = material.MaterialName;
+        materialCopy.MaterialAmount = material.MaterialAmount;
+        materialCopy.IsStackable = material.IsStackable;
+
+        if (materialCopy.IsStackable)
         {
-            if (item.MaterialName == material.MaterialName)
+            //If the item is already in the inventory increment the amount of materials by 1
+            foreach (MaterialStruct item in itemList)
             {
-                itemList[itemList.IndexOf(item)].MaterialAmount += 1;
-                slotList[item.MaterialIndex].GetComponentInChildren<TextMeshProUGUI>().text =
-                    itemList[itemList.IndexOf(item)].MaterialAmount + "x";
-                return;
+                if (item.MaterialName == materialCopy.MaterialName)
+                {
+                    itemList[itemList.IndexOf(item)].MaterialAmount += 1;
+                    slotList[item.MaterialIndex].GetComponentInChildren<TextMeshProUGUI>().text =
+                        itemList[itemList.IndexOf(item)].MaterialAmount + "x";
+                    return;
+                }
             }
         }
         //Else equip it to the next slot
         whatSlotToEquip = findNextFreeSlot();
         if (whatSlotToEquip == null) return;
 
-        itemToAdd = Instantiate(Resources.Load<GameObject>(material.MaterialName),
+        itemToAdd = Instantiate(Resources.Load<GameObject>(materialCopy.MaterialName),
             Vector3.zero, whatSlotToEquip.transform.rotation);
         //Replace the (Clone) name given to the GO at instantiation time now rather than replace it
         //for every goddamn time that is needed
-        itemToAdd.name = itemToAdd.name.Replace("(Clone)", "");
+        itemToAdd.name = itemToAdd.name.Replace("(Clone)", string.Empty);
+
+        if(checkForDuplicates(itemToAdd))
+        {
+            materialCopy.MaterialName += "1";
+        }
+
         itemToAdd.transform.SetParent(whatSlotToEquip.transform, false);
 
         int itemSlotIndex = slotList.IndexOf(whatSlotToEquip);
-        material.MaterialIndex = itemSlotIndex;
+        materialCopy.MaterialIndex = itemSlotIndex;
         //No. of quick slots starting from 0
-        if(itemSlotIndex <= 4)
+        if (itemSlotIndex <= 4)
         {
             InstantiateItem(itemSlotIndex);
         }
-        itemList.Add(material);
+        itemList.Add(materialCopy);
+    }
+
+    private bool checkForDuplicates(GameObject itemToAdd)
+    {
+        //Check if an item already with the same name already exists, for example
+        //Stone Axe, Stone Axe -> Stone Axe, Stone Axe1
+        foreach (Transform child in itemHolder.transform)
+        {
+            if (child.name == itemToAdd.name)
+            {
+                itemToAdd.name += "1";
+                return true;
+            }
+        }
+        return false;
     }
 
     private GameObject findNextFreeSlot()
@@ -335,4 +379,5 @@ public class MaterialStruct
     public string MaterialName;
     public int MaterialAmount;
     public int MaterialIndex;
+    public bool IsStackable;
 }

@@ -16,6 +16,7 @@ MonoBehaviour:
     MaterialName: Arrow
     MaterialAmount: 3
     MaterialIndex: 0
+    IsStackable: 1
   MaterialsNeeded:
   - Material: 0
     AmountOfMaterial: 1

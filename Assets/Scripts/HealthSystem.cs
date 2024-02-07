@@ -8,42 +8,46 @@ public class HealthSystem : MonoBehaviour
 {
 	public static HealthSystem Instance;
 
-	[Header("Decreasing Stats")]
-	[SerializeField] private float reduceHealthPeriod = 1f;
-	[SerializeField] private float healthReduction = 1f;
-	//The frequency at which we will deduce hydration / hunger.
-	[SerializeField] private float timeToReduceHealth;
-	[SerializeField] private float hydrationDecreaseTime = 1.5f;
-	[SerializeField] private float hungerDecreaseTime = 3f;
-	//The amounts that we will deduce from our hydration / hunger bars.
-	[SerializeField] private float hydrationDecreaseAmount = 1f;
-	[SerializeField] private float hungerDecreaseAmount = 1f;
-	private float hydrationTimer = 0;
-	private float hungerTimer = 0;
+	[Space(5)]
+	[Header("Warmness Stats")]
+	public bool isAroundHot = false;
+	[SerializeField] private Image currentWarmnessBar;
+	[SerializeField] private float warmnessPoints = 100f;
+	[SerializeField] private float maxWarmnessPoints = 100f;
+	[SerializeField] private float warmnessDecreaseTime = 2f;
+	[SerializeField] private float warmnessDecreaseAmount = 1f;
 
 	[Space(5)]
 	[Header("Food Stats")]
 	[SerializeField] private Image currentFoodBar;
-	[SerializeField] private TextMeshProUGUI FoodText;
-	[SerializeField] private float hungerPoint = 100f;
-	[SerializeField] private float maxFoodPoint = 100f;
+	[SerializeField] private float hungerPoints = 100f;
+	[SerializeField] private float maxFoodPoints = 100f;
+	[SerializeField] private float hungerDecreaseTime = 3f;
+	[SerializeField] private float hungerDecreaseAmount = 1f;
 
 	[Space(5)]
 	[Header("Health Stats")]
 	[SerializeField] private Image currentHealthBar;
-	[SerializeField] private TextMeshProUGUI healthText;
-	[SerializeField] private float healthPoint = 100f;
-	[SerializeField] private float maxHitPoint = 100f;
+	[SerializeField] private float healthPoints = 100f;
+	[SerializeField] private float maxHitPoints = 100f;
+	[SerializeField] private float healthReduction = 1f;
+	[SerializeField] private float healthDecreaseTime = 1f;
 
 	[Space(5)]
 	[Header("Hydration Stats")]
 	[SerializeField] private Image currentWaterBar;
-	[SerializeField] private TextMeshProUGUI hydrationText;
-	[SerializeField] private float waterPoint = 100f;
-	[SerializeField] private float maxWaterPoint = 100f;
+	[SerializeField] private float waterPoints = 100f;
+	[SerializeField] private float maxWaterPoints = 100f;
+	[SerializeField] private float hydrationDecreaseTime = 1.5f;
+	[SerializeField] private float hydrationDecreaseAmount = 1f;
 
 	[Space(5)]
 	[SerializeField] private float regenTime = 3f;
+
+	private float hydrationTimer = 0;
+	private float hungerTimer = 0;
+	private float warmnessTimer = 0;
+
 	private float timeleft = 0.0f;
 
 	void Awake()
@@ -55,6 +59,7 @@ public class HealthSystem : MonoBehaviour
 	{
 		StartCoroutine(checkHydration());
 		StartCoroutine(checkHunger());
+		StartCoroutine(checkWarmness());
 
 		UpdateGraphics();
 	}
@@ -69,60 +74,85 @@ public class HealthSystem : MonoBehaviour
 			ReduceHydration(hydrationDecreaseAmount);
 			hydrationTimer = hydrationDecreaseTime;
 		}
+
 		if(hungerTimer <= 0)
 		{
 			ReduceHunger(hungerDecreaseAmount);
 			hungerTimer = hungerDecreaseTime;
 		}
+
+		if(warmnessTimer <= 0)
+		{
+			if(!isAroundHot)
+			{
+				ReduceWarmness(warmnessDecreaseAmount);
+			}
+			else
+			{
+				RestoreWarmness(warmnessDecreaseAmount);
+			}
+			warmnessTimer = warmnessDecreaseTime;
+		}
+
 		hydrationTimer -= Time.deltaTime;
 		hungerTimer -= Time.deltaTime;
+		warmnessTimer -= Time.deltaTime;
     }
 
     void Update()
 	{
 		UpdateTimers();
-		if(healthPoint <= 0)
+		if(healthPoints <= 0)
 		{
 			Die();
 		}
-		//Make them co-routines
-		//checkHydration();
-		//checkHunger();
 	}
 
     private void Die()
     {
-        healthPoint = 0;
+        healthPoints = 0;
     }
 
     private IEnumerator checkHydration()
     {
-		yield return new WaitForSeconds(reduceHealthPeriod);
-		if(waterPoint <= 0)
+		yield return new WaitForSeconds(hydrationDecreaseTime);
+		if(waterPoints <= 0)
 		{
-			healthPoint -= healthReduction;
+			healthPoints -= healthReduction;
 		}
+
 		StartCoroutine(checkHydration());
 		yield return null;
     }
     private IEnumerator checkHunger()
     {
-		yield return new WaitForSeconds(reduceHealthPeriod);
-		if(hungerPoint <= 0)
+		yield return new WaitForSeconds(hungerDecreaseTime);
+		if(hungerPoints <= 0)
 		{
-			healthPoint -= healthReduction;
+			healthPoints -= healthReduction;
 		}
 		StartCoroutine(checkHunger());
 		yield return null;
     }
-    public void Regen(int hungerAmount, int healthAmount, int hydrationAmount)
+	private IEnumerator checkWarmness()
+    {
+		yield return new WaitForSeconds(warmnessDecreaseTime);
+		if(warmnessPoints <= 0)
+		{
+			healthPoints -= healthReduction;
+		}
+		StartCoroutine(checkWarmness());
+		yield return null;
+    }
+    public void Regen(int hungerAmount, int healthAmount, int hydrationAmount, int warmness)
 	{
 		//Start the coroutine in a different function because readable code
 		timeleft = regenTime;
-		StartCoroutine(regenCoroutine(hungerAmount, healthAmount, hydrationAmount));
+		StartCoroutine(regenCoroutine(hungerAmount, healthAmount, hydrationAmount, warmness));
 	}
-	private IEnumerator regenCoroutine(int hungerAmount, int healthAmount, int hydrationAmount)
+	private IEnumerator regenCoroutine(int hungerAmount, int healthAmount, int hydrationAmount, int warmness)
 	{
+		RestoreWarmness(warmness);
 		while(timeleft > 0.0f)
 		{
 			RestoreHydration(hydrationAmount / regenTime);
@@ -135,75 +165,91 @@ public class HealthSystem : MonoBehaviour
 		}
 		yield return null;
 	}
-	private void UpdateHealthBar()
-	{
-		float ratio = healthPoint / maxHitPoint;
-		currentHealthBar.fillAmount = ratio;
-		//healthText.text = healthPoint.ToString("0") + "/" + maxHitPoint.ToString("0");
-	}
 
 	public void TakeDamage(float Damage)
 	{
-		healthPoint -= Damage;
-		if (healthPoint < 1)
-			healthPoint = 0;
+		healthPoints -= Damage;
+		if (healthPoints < 1)
+			healthPoints = 0;
 
 		UpdateGraphics();
 	}
 
-	public void RestoreHealth(float Heal)
+	private void UpdateHealthBar()
 	{
-		healthPoint += Heal;
-		if (healthPoint > maxHitPoint) 
-			healthPoint = maxHitPoint;
-
-		UpdateGraphics();
+		float ratio = healthPoints / maxHitPoints;
+		currentHealthBar.fillAmount = ratio;
 	}
 
 	private void UpdateHydrationBar()
 	{
-		float ratio = waterPoint / maxWaterPoint;
+		float ratio = waterPoints / maxWaterPoints;
 		currentWaterBar.fillAmount = ratio;
-		//hydrationText.text = hydrationPoint.ToString ("0") + "/" + maxhydrationPoint.ToString ("0");
 	}
+
 	private void UpdateHungerBar()
 	{
-		float ratio = hungerPoint / maxFoodPoint;
+		float ratio = hungerPoints / maxFoodPoints;
 		currentFoodBar.fillAmount = ratio;
-		//FoodText.text = hungerPoint.ToString ("0") + "/" + maxFoodPoint.ToString ("0");
 	}
 
-	public void ReduceHydration(float waterAmount)
+	private void UpdateWarmnessBar()
 	{
-		waterPoint -= waterAmount;
-		if (waterPoint < 1)
-			waterPoint = 0;
+		float ratio = warmnessPoints / maxWarmnessPoints;
+		currentWarmnessBar.fillAmount = ratio;
+	}
 
-		UpdateGraphics();
+	public void RestoreHealth(float Heal)
+	{
+		healthPoints += Heal;
+		if (healthPoints > maxHitPoints) 
+			healthPoints = maxHitPoints;
 	}
 
 	public void RestoreHydration(float Mana)
 	{
-		waterPoint += Mana;
-		if (waterPoint > maxWaterPoint) 
-			waterPoint = maxWaterPoint;
-
-		UpdateGraphics();
-	}
-	public void ReduceHunger(float hungerAmount)
-	{
-		hungerPoint -= hungerAmount;
-		if (hungerPoint < 1)
-			hungerPoint = 0;
-
-		UpdateGraphics();
+		waterPoints += Mana;
+		if (waterPoints > maxWaterPoints) 
+			waterPoints = maxWaterPoints;
 	}
 
 	public void RestoreHunger(float hungerAmount)
 	{
-		hungerPoint += hungerAmount;
-		if (hungerPoint > maxWaterPoint) 
-			hungerPoint = maxWaterPoint;
+		hungerPoints += hungerAmount;
+		if (hungerPoints > maxWaterPoints) 
+			hungerPoints = maxWaterPoints;
+	}
+
+	public void RestoreWarmness(float hot)
+	{
+		warmnessPoints += hot;
+		if (warmnessPoints > maxWarmnessPoints) 
+			warmnessPoints = maxWarmnessPoints;
+	}
+
+	public void ReduceWarmness(float hot)
+	{
+		warmnessPoints -= hot;
+		if (warmnessPoints < 0) 
+			warmnessPoints = 0;
+
+		UpdateGraphics();
+	}
+
+	public void ReduceHydration(float waterAmount)
+	{
+		waterPoints -= waterAmount;
+		if (waterPoints < 1)
+			waterPoints = 0;
+
+		UpdateGraphics();
+	}
+
+	public void ReduceHunger(float hungerAmount)
+	{
+		hungerPoints -= hungerAmount;
+		if (hungerPoints < 1)
+			hungerPoints = 0;
 
 		UpdateGraphics();
 	}
@@ -213,5 +259,6 @@ public class HealthSystem : MonoBehaviour
 		UpdateHealthBar();
 		UpdateHydrationBar();
 		UpdateHungerBar();
+		UpdateWarmnessBar();
 	}
 }

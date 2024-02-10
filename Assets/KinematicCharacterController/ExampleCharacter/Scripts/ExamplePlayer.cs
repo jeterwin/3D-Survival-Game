@@ -16,6 +16,7 @@ namespace KinematicCharacterController.Examples
         private const string MouseScrollInput = "Mouse ScrollWheel";
         private const string HorizontalInput = "Horizontal";
         private const string VerticalInput = "Vertical";
+        private const string ShiftInput = "LeftShift";
 
         private void Start()
         {
@@ -76,6 +77,7 @@ namespace KinematicCharacterController.Examples
             characterInputs.JumpDown = Input.GetKeyDown(KeyCode.Space);
             characterInputs.CrouchDown = Input.GetKeyDown(KeyCode.LeftControl);
             characterInputs.CrouchUp = Input.GetKeyUp(KeyCode.LeftControl);
+            characterInputs.LeftShift = Input.GetKey(KeyCode.LeftShift);
 
             // Apply inputs to character
             Character.SetInputs(ref characterInputs);

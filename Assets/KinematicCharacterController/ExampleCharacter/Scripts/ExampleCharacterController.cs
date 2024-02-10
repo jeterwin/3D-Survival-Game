@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using KinematicCharacterController;
 using System;
+using UnityEngine.UI;
+using static System.TimeZoneInfo;
+using UnityEngine.VFX;
 
 namespace KinematicCharacterController.Examples
 {
@@ -25,6 +28,7 @@ namespace KinematicCharacterController.Examples
         public bool JumpDown;
         public bool CrouchDown;
         public bool CrouchUp;
+        public bool LeftShift;
     }
 
     public struct AICharacterInputs
@@ -49,6 +53,46 @@ namespace KinematicCharacterController.Examples
             get { return rawInputs; }
         }
         public KinematicCharacterMotor Motor;
+
+        [Header("Camera FOV")]
+        [SerializeField] private Camera mainCamera;
+        [SerializeField] private Camera itemCamera;
+        [SerializeField] private float walkingFOV = 75f;
+        [SerializeField] private float sprintingFOV = 85f;
+        [SerializeField] private float FOVLerpTime = 0.3f;
+        private float transitionTime = 0f;
+
+        [Header("Normal Movement")]
+        [SerializeField] private float NormalStableMoveSpeed = 10f;
+        [SerializeField] private float NormalMovementSharpness = 15f;
+        [SerializeField] private float NormalOrientationSharpness = 10f;
+
+        [Header("Sprinting Movement")]
+        [SerializeField] private FootstepsScript footstepsScript;
+        [SerializeField] private float walkingStepFreq = 0.7f;
+        [SerializeField] private float sprintingStepFreq = 0.5f;
+        [SerializeField] private float stepFreq = 0.7f;
+        [Space(3)]
+
+        [SerializeField] private float SprintingStableMoveSpeed = 10f;
+        [SerializeField] private float SprintingMovementSharpness = 15f;
+        [SerializeField] private float SprintingOrientationSharpness = 10f;
+
+        [Header("Sprinting VFX")]
+        [SerializeField] private VisualEffect sprintingVFX;
+        [SerializeField] private float sprintingParticleRate = 40f;
+        [SerializeField] private float walkingParticleRate = 0f;
+        [Space(3)]
+
+        //Yes this script should also handle sprinting, yes.
+        [Header("Sprinting UI / Stats")]
+        [SerializeField] private Animator animator;
+        [SerializeField] private Image staminaBar;
+        [Range(0f, 1f)]
+        [SerializeField] private float stamina = 1f;
+        [SerializeField] private float staminaDecay = 0.1f;
+        [SerializeField] private float staminaGain = 0.1f;
+
 
         [Header("Stable Movement")]
         public float MaxStableMoveSpeed = 10f;
@@ -173,47 +217,95 @@ namespace KinematicCharacterController.Examples
             switch (CurrentCharacterState)
             {
                 case CharacterState.Default:
+                {
+                    // Move and look inputs
+                    _moveInputVector = cameraPlanarRotation * moveInputVector;
+
+                    switch (OrientationMethod)
                     {
-                        // Move and look inputs
-                        _moveInputVector = cameraPlanarRotation * moveInputVector;
-
-                        switch (OrientationMethod)
-                        {
-                            case OrientationMethod.TowardsCamera:
-                                _lookInputVector = cameraPlanarDirection;
-                                break;
-                            case OrientationMethod.TowardsMovement:
-                                _lookInputVector = _moveInputVector.normalized;
-                                break;
-                        }
-
-                        // Jumping input
-                        if (inputs.JumpDown)
-                        {
-                            _timeSinceJumpRequested = 0f;
-                            _jumpRequested = true;
-                        }
-
-                        // Crouching input
-                        if (inputs.CrouchDown)
-                        {
-                            _shouldBeCrouching = true;
-
-                            if (!_isCrouching)
-                            {
-                                _isCrouching = true;
-                                Motor.SetCapsuleDimensions(0.5f, CrouchedCapsuleHeight, CrouchedCapsuleHeight * 0.5f);
-                                MeshRoot.localScale = new Vector3(1f, 0.5f, 1f);
-                            }
-                        }
-                        else if (inputs.CrouchUp)
-                        {
-                            _shouldBeCrouching = false;
-                        }
-
-                        break;
+                        case OrientationMethod.TowardsCamera:
+                            _lookInputVector = cameraPlanarDirection;
+                            break;
+                        case OrientationMethod.TowardsMovement:
+                            _lookInputVector = _moveInputVector.normalized;
+                            break;
                     }
+
+                    // Jumping input
+                    if (inputs.JumpDown)
+                    {
+                        _timeSinceJumpRequested = 0f;
+                        _jumpRequested = true;
+                    }
+
+                    // Crouching input
+                    if (inputs.CrouchDown)
+                    {
+                        _shouldBeCrouching = true;
+
+                        if (!_isCrouching)
+                        {
+                            _isCrouching = true;
+                            Motor.SetCapsuleDimensions(0.5f, CrouchedCapsuleHeight, CrouchedCapsuleHeight * 0.5f);
+                            MeshRoot.localScale = new Vector3(1f, 0.5f, 1f);
+                        }
+                    }
+                    else if (inputs.CrouchUp)
+                    {
+                        _shouldBeCrouching = false;
+                    }
+
+
+                    break;
+                }
             }
+            //Sprinting input
+            Sprint(inputs);
+        }
+
+        private void Sprint(PlayerCharacterInputs inputs)
+        {
+            bool canSprint = inputs.LeftShift && stamina > 0 && MoveInputVector.magnitude > 0;
+            footstepsScript.Stepfrequency = canSprint ? sprintingStepFreq : walkingStepFreq; 
+
+            MaxStableMoveSpeed = canSprint ? SprintingStableMoveSpeed : NormalStableMoveSpeed;
+            StableMovementSharpness = canSprint ? SprintingMovementSharpness : NormalMovementSharpness;
+            OrientationSharpness = canSprint ? SprintingOrientationSharpness : NormalOrientationSharpness;
+
+            if (canSprint)
+            {
+                transitionTime += Time.deltaTime;
+                if(transitionTime > FOVLerpTime)
+                {
+                    transitionTime = FOVLerpTime;
+                }
+
+                animator.SetFloat("fadesIn", 1);
+                stamina -= staminaDecay * Time.deltaTime;
+                if(stamina < 0)
+                {
+                    stamina = 0;
+                }
+            }
+            else
+            {
+                transitionTime -= Time.deltaTime;
+
+                if(transitionTime < 0)
+                {
+                    transitionTime = 0;
+                }
+
+                stamina += staminaGain * Time.deltaTime;
+                if(stamina >= 1)
+                {
+                    stamina = 1;
+                    animator.SetFloat("fadesIn", -1);
+                }
+            }
+            mainCamera.fieldOfView = itemCamera.fieldOfView = Mathf.Lerp(walkingFOV, sprintingFOV, transitionTime / FOVLerpTime);
+            sprintingVFX.SetFloat("SpawnRate", canSprint ? sprintingParticleRate : walkingParticleRate);
+            staminaBar.fillAmount = stamina;
         }
 
         /// <summary>

@@ -5,9 +5,9 @@ using UnityEngine;
  
 public class FootstepsScript : MonoBehaviour
 {
-    [SerializeField] private FSR_Player fSR_Player;
+    public float Stepfrequency = 0.5f;
 
-    [SerializeField] private float stepfrequency = 0.5f;
+    [SerializeField] private FSR_Player fSR_Player;
 
     [SerializeField] private ExampleCharacterController rb;
 
@@ -15,7 +15,7 @@ public class FootstepsScript : MonoBehaviour
     private void Update()
     {
         stepTimer += Time.deltaTime;
-        if (stepTimer > stepfrequency && rb.MoveInputVector.magnitude > 0.1f)
+        if (stepTimer > Stepfrequency && rb.MoveInputVector.magnitude > 0.1f)
         {
             stepTimer = 0;
             fSR_Player.step();

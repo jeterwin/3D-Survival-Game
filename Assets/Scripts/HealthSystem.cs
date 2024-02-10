@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System;
+using System.Linq.Expressions;
+using Unity.VisualScripting;
 
 public class HealthSystem : MonoBehaviour
 {
@@ -11,6 +13,13 @@ public class HealthSystem : MonoBehaviour
 	[Space(5)]
 	[Header("Warmness Stats")]
 	public bool isAroundHot = false;
+
+	[SerializeField] private Material freezeMaterial;
+    [SerializeField] private float freezeNormIntensity = 0.5f;
+	[SerializeField] private float freezeFullIntensity = 1.5f;
+
+	private float currentFreezeIntensity = 0f;
+
 	[SerializeField] private Image currentWarmnessBar;
 	[SerializeField] private float warmnessPoints = 100f;
 	[SerializeField] private float maxWarmnessPoints = 100f;
@@ -27,6 +36,12 @@ public class HealthSystem : MonoBehaviour
 
 	[Space(5)]
 	[Header("Health Stats")]
+	[SerializeField] private Material damageMaterial;
+    [SerializeField] private float vignetteIntensity = 1f;
+
+	private float currentVignetteIntensity = 0f;
+	private bool tookDamage = false;
+
 	[SerializeField] private Image currentHealthBar;
 	[SerializeField] private float healthPoints = 100f;
 	[SerializeField] private float maxHitPoints = 100f;
@@ -47,8 +62,7 @@ public class HealthSystem : MonoBehaviour
 	private float hydrationTimer = 0;
 	private float hungerTimer = 0;
 	private float warmnessTimer = 0;
-
-	private float timeleft = 0.0f;
+	private float half = 0.5f;
 
 	void Awake()
 	{
@@ -63,7 +77,6 @@ public class HealthSystem : MonoBehaviour
 
 		UpdateGraphics();
 	}
-
 
     private void UpdateTimers()
     {
@@ -106,7 +119,15 @@ public class HealthSystem : MonoBehaviour
 		{
 			Die();
 		}
+
+		updateFreezeScreen();
 	}
+
+    private void updateFreezeScreen()
+    {
+		currentFreezeIntensity = Mathf.Lerp(freezeFullIntensity, freezeNormIntensity, warmnessPoints / maxWarmnessPoints);
+        freezeMaterial.SetFloat("_VignetteIntensity", currentFreezeIntensity);
+    }
 
     private void Die()
     {
@@ -119,6 +140,27 @@ public class HealthSystem : MonoBehaviour
 		if(waterPoints <= 0)
 		{
 			healthPoints -= healthReduction;
+			if(!tookDamage)
+			{
+				tookDamage = true;
+				float time = 0;
+				while(time <= hungerDecreaseTime * half)
+				{
+					currentVignetteIntensity = Mathf.Lerp(0, vignetteIntensity, time / (hungerDecreaseTime * half));
+					damageMaterial.SetFloat("_VignetteIntensity", currentVignetteIntensity);
+					time += Time.deltaTime;
+					yield return null;
+				}
+				time = 0;
+				while(time <= hungerDecreaseTime * half)
+				{
+					currentVignetteIntensity = Mathf.Lerp(vignetteIntensity, 0, time / (hungerDecreaseTime * half));
+					damageMaterial.SetFloat("_VignetteIntensity", currentVignetteIntensity);
+					time += Time.deltaTime;
+					yield return null;
+				}
+				tookDamage = false;
+			}
 		}
 
 		StartCoroutine(checkHydration());
@@ -130,6 +172,27 @@ public class HealthSystem : MonoBehaviour
 		if(hungerPoints <= 0)
 		{
 			healthPoints -= healthReduction;
+			if(!tookDamage)
+			{
+				tookDamage = true;
+				float time = 0;
+				while(time <= hungerDecreaseTime * half)
+				{
+					currentVignetteIntensity = Mathf.Lerp(0, vignetteIntensity, time / (hungerDecreaseTime * half));
+					damageMaterial.SetFloat("_VignetteIntensity", currentVignetteIntensity);
+					time += Time.deltaTime;
+					yield return null;
+				}
+				time = 0;
+				while(time <= hungerDecreaseTime * half)
+				{
+					currentVignetteIntensity = Mathf.Lerp(vignetteIntensity, 0, time / (hungerDecreaseTime * half));
+					damageMaterial.SetFloat("_VignetteIntensity", currentVignetteIntensity);
+					time += Time.deltaTime;
+					yield return null;
+				}
+				tookDamage = false;
+			}
 		}
 		StartCoroutine(checkHunger());
 		yield return null;
@@ -138,32 +201,100 @@ public class HealthSystem : MonoBehaviour
     {
 		yield return new WaitForSeconds(warmnessDecreaseTime);
 		if(warmnessPoints <= 0)
-		{
+        {
 			healthPoints -= healthReduction;
-		}
-		StartCoroutine(checkWarmness());
+			if(!tookDamage)
+			{
+				tookDamage = true;
+				float time = 0;
+				while(time <= warmnessDecreaseTime * half)
+				{
+					currentVignetteIntensity = Mathf.Lerp(0, vignetteIntensity, time / (warmnessDecreaseTime * half));
+					damageMaterial.SetFloat("_VignetteIntensity", currentVignetteIntensity);
+					time += Time.deltaTime;
+					yield return null;
+				}
+				time = 0;
+				while(time <= warmnessDecreaseTime * half)
+				{
+					currentVignetteIntensity = Mathf.Lerp(vignetteIntensity, 0, time / (warmnessDecreaseTime * half));
+					damageMaterial.SetFloat("_VignetteIntensity", currentVignetteIntensity);
+					time += Time.deltaTime;
+					yield return null;
+				}
+				tookDamage = false;
+			}
+        }
+        StartCoroutine(checkWarmness());
 		yield return null;
     }
-    public void Regen(int hungerAmount, int healthAmount, int hydrationAmount, int warmness)
+
+	private IEnumerator regenHunger(int hungerAmount)
 	{
-		//Start the coroutine in a different function because readable code
-		timeleft = regenTime;
-		StartCoroutine(regenCoroutine(hungerAmount, healthAmount, hydrationAmount, warmness));
-	}
-	private IEnumerator regenCoroutine(int hungerAmount, int healthAmount, int hydrationAmount, int warmness)
-	{
-		RestoreWarmness(warmness);
+		if(hungerAmount == 0) { yield break; }
+
+		float timeleft = regenTime;
 		while(timeleft > 0.0f)
 		{
-			RestoreHydration(hydrationAmount / regenTime);
 			RestoreHunger(hungerAmount / regenTime);
-			RestoreHealth(healthAmount / regenTime);
-
-			UpdateGraphics();
 			timeleft -= 1f;
+			UpdateGraphics();
 			yield return new WaitForSeconds(1f);
 		}
 		yield return null;
+	}
+	private IEnumerator regenHealth(int healthAmount)
+	{
+		if(healthAmount == 0) { yield break; }
+
+		float timeleft = regenTime;
+		while(timeleft > 0.0f)
+		{
+			RestoreHealth(healthAmount / regenTime);
+			timeleft -= 1f;
+			UpdateGraphics();
+			yield return new WaitForSeconds(1f);
+		}
+		yield return null;
+	}
+	private IEnumerator regenHydration(int hydrationAmount)
+	{
+		if(hydrationAmount == 0) { yield break; }
+
+		float timeleft = regenTime;
+		while(timeleft > 0.0f)
+		{
+			RestoreHydration(hydrationAmount / regenTime);
+			timeleft -= 1f;
+			UpdateGraphics();
+			yield return new WaitForSeconds(1f);
+		}
+		yield return null;
+	}
+	private IEnumerator regenWarmness(int warmness)
+	{
+		if(warmness == 0) { yield break; }
+
+		float timeleft = regenTime;
+		while(timeleft > 0.0f)
+		{
+			RestoreWarmness(warmness / regenTime);
+			timeleft -= 1f;
+			UpdateGraphics();
+			yield return new WaitForSeconds(1f);
+		}
+		yield return null;
+	}
+
+	//Better to have 1 function that can call 4 different functions that can each stop immediately
+	//than have 4 functions run at the same time and get called n times when the respective resource
+	//(hunger) is 0 lmao
+	public void Regen(int hunger, int health, int hydration, int warmness)
+	{
+		StartCoroutine(regenHunger(hunger));
+		StartCoroutine(regenHealth(health));
+		StartCoroutine(regenHydration(hydration));
+		StartCoroutine(regenWarmness(warmness));
 	}
 
 	public void TakeDamage(float Damage)

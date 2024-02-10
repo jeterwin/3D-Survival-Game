@@ -47,7 +47,7 @@ public class ItemSway : MonoBehaviour
     }
     private bool isMoving
     {
-        get { return ExampleCharacterController.Instance.RawInputs.MoveAxisForward != 0f; }
+        get { return ExampleCharacterController.Instance.MoveInputVector.magnitude > 0f; }
     }
 
     Vector2 lookInput;
@@ -93,9 +93,9 @@ public class ItemSway : MonoBehaviour
 
     void BobRotation()
     {
-        bobEulerRotation.x = isMoving ? multiplier.x * (Mathf.Sin(2 * speedCurve)) : multiplier.x * (Mathf.Sin(2 * speedCurve) / 2);
+        bobEulerRotation.x = isMoving ? multiplier.x * Mathf.Sin(2 * speedCurve) : multiplier.x * (Mathf.Sin(2 * speedCurve) / 2);
         bobEulerRotation.y = isMoving ? multiplier.y * curveCos : 0;
-        bobEulerRotation.z = (isMoving ? multiplier.z * curveCos * ExampleCharacterController.Instance.RawInputs.MoveAxisRight : 0);
+        bobEulerRotation.z = isMoving ? multiplier.z * curveCos * ExampleCharacterController.Instance.RawInputs.MoveAxisRight : 0;
     }
 
 }

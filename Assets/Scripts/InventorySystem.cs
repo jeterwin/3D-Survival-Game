@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
  
@@ -139,6 +140,24 @@ public class InventorySystem : MonoBehaviour
     {
         //if(SlotList[slot].transform.childCount == 0) { return; }
 
+        if(SlotList[slot].transform.childCount > 0)
+        {
+            BuildableItem buildable = SlotList[slot].transform.GetChild(0).GetComponent<BuildableItem>();
+            if(buildable != null)
+            {
+                BuildingManager.Instance.IsBuilding = true;
+                BuildingManager.Instance.CurrentBuilding = buildable.BuildingPrefab;
+                BuildingManager.Instance.CurrentBuildType = buildable.BuildingType;
+            }
+            else
+            {
+                BuildingManager.Instance.IsBuilding = false;
+            }
+        }
+        else
+        {
+            BuildingManager.Instance.IsBuilding = false;
+        }
         //Set the current slot colors accordingly
         circleTexts[currentEquippedSlot].color = textEquippedColor;
         circleImages[currentEquippedSlot].color = circleEquippedColor;
@@ -182,6 +201,20 @@ public class InventorySystem : MonoBehaviour
             }
         }
     }
+    public int ReturnMaterialQuantity(string materialName)
+    {
+        int counter = 0;
+        foreach(MaterialStruct materialItem in itemList)
+        {
+            if(materialName == materialItem.MaterialName)
+            {
+                return itemList[counter].MaterialAmount;
+            }
+            counter += 1;
+        }
+
+        return 0;
+    }
     public void InstantiateItem(int slot)
     {
         //Somehow make pooling out of all of them instead of instantiate one by one
@@ -190,7 +223,9 @@ public class InventorySystem : MonoBehaviour
 
         UtilityItem utilityItem = newItem.GetComponent<UtilityItem>();
         if(utilityItem != null)
-            utilityItem.inventoryItem = slotList[slot].GetComponentInChildren<InventoryItem>();
+        {
+            utilityItem.item = slotList[slot].GetComponentInChildren<UsableItem>();
+        }
         //De-activate the item on instantiation, replace the annoying text name, chil it to the
         //itemHolder transform which is on the player's camera, add the item to the
         //equippable items list for easier, set the later to Items so only the secondary camera
@@ -302,7 +337,7 @@ public class InventorySystem : MonoBehaviour
         int itemSlotIndex = slotList.IndexOf(whatSlotToEquip);
         materialCopy.MaterialIndex = itemSlotIndex;
         //No. of quick slots starting from 0
-        if (itemSlotIndex <= 4)
+        if (itemSlotIndex <= 4 && itemToAdd.GetComponent<BuildableItem>() == null)
         {
             InstantiateItem(itemSlotIndex);
         }

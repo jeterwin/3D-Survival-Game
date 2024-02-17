@@ -123,4 +123,4 @@ MonoBehaviour:
     MaterialName: Stone
     MaterialAmount: 1
     MaterialIndex: 0
-    IsStackable: 0
+    IsStackable: 1

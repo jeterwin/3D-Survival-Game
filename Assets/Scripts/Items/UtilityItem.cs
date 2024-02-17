@@ -4,10 +4,17 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public abstract class UtilityItem : MonoBehaviour
 {
-    public InventoryItem inventoryItem;
+    public UsableItem item;
 
     [SerializeField] private AudioClip swingSFX;
     [SerializeField] private AudioClip hitSFX;
+
+    [SerializeField] private GameObject particlesHitSFX;
+
+    public GameObject ParticlesHitSFX
+    {
+        get { return particlesHitSFX; } 
+    } 
 
     [SerializeField] private MeshCollider meshCollider;
 
@@ -67,8 +74,8 @@ public abstract class UtilityItem : MonoBehaviour
         audioSource.PlayOneShot(hitSFX);
         itemDurability -= damage;
         float durabilityPercentage = itemDurability / maxItemDurability;
-        inventoryItem.DurabilityBar.fillAmount = durabilityPercentage;
-        inventoryItem.DurabilityBar.color = inventoryItem.DurabilityGradient.Evaluate(durabilityPercentage);
+        item.DurabilityBar.fillAmount = durabilityPercentage;
+        item.DurabilityBar.color = item.DurabilityGradient.Evaluate(durabilityPercentage);
 
         if(itemDurability <= 0)
         {

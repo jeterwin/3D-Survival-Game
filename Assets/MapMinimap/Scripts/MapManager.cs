@@ -14,7 +14,6 @@ namespace MapMinimap
     {
         public MapSettingsData default_settings;    //This will be used if no MapSettingsData is added to the scene
         public GameObject map_ui;
-        public GameObject event_system;
 
         public UnityAction onOpenMap;
         public UnityAction onCloseMap;
@@ -37,10 +36,6 @@ namespace MapMinimap
             MapUI ui = FindObjectOfType<MapUI>();
             if (ui == null)
                 Instantiate(map_ui);
-
-            EventSystem evt_sys = FindObjectOfType<EventSystem>();
-            if (evt_sys == null)
-                Instantiate(event_system);
 
             MapData.LoadLast();
         }

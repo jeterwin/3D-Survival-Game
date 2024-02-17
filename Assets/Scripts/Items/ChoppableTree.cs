@@ -11,17 +11,15 @@ public class ChoppableTree : BreakableItem
         if(collision.gameObject.TryGetComponent(out AxeItem axe))
         {
             TakeDamage(axe.TreeDamage);
-            if(ObjectHealth % 25 == 0)
-            {
-                spawnObject(collision.contacts[0].point);
-            }
+            spawnObject(collision.contacts[0].point, axe);
 
             axe.TakeDamage(axe.SelfDamagerPerHit);
         }
     }
 
-    private void spawnObject(Vector3 position)
+    private void spawnObject(Vector3 position, AxeItem axe)
     {
+        Instantiate(axe.ParticlesHitSFX, position, Quaternion.identity);
         Instantiate(objectPrefab, position, Quaternion.identity);
     }
 }

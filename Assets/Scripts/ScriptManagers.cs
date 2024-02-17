@@ -11,7 +11,5 @@ public class ScriptManagers : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        inventorySystem = GetComponent<InventorySystem>();
-        craftingSystem = GetComponent<CraftingSystem>();
     }
 }

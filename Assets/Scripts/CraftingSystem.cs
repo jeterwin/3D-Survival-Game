@@ -13,13 +13,13 @@ public class CraftingSystem : MonoBehaviour
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip sucessfulCraft;
 
-    [SerializeField] private Craftable[] CraftableFood;
     [SerializeField] private Craftable[] CraftableTools;
     [SerializeField] private Craftable[] CraftableWeapons;
+    [SerializeField] private Craftable[] CraftableConstructions;
 
     [SerializeField] private GameObject craftingSystemUI;
 
-    [SerializeField] private Transform FoodGrid;
+    [SerializeField] private Transform ConstructionsGrid;
     [SerializeField] private Transform ToolsGrid;
     [SerializeField] private Transform WeaponsGrid;
 
@@ -40,10 +40,10 @@ public class CraftingSystem : MonoBehaviour
     }
     private void Start()
     {
-        CraftableFood = Resources.LoadAll<Craftable>("CraftableFood");
+        CraftableConstructions = Resources.LoadAll<Craftable>("CraftableConstructions");
         CraftableTools = Resources.LoadAll<Craftable>("CraftableTools");
         CraftableWeapons = Resources.LoadAll<Craftable>("CraftableWeapons");
-        PopulateCraftableItems(FoodGrid, CraftableFood);
+        PopulateCraftableItems(ConstructionsGrid, CraftableConstructions);
         PopulateCraftableItems(ToolsGrid, CraftableTools);
         PopulateCraftableItems(WeaponsGrid, CraftableWeapons);
     }

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 698043076281353768}
   - component: {fileID: 4892038898749675168}
   - component: {fileID: 2657700808653832516}
-  - component: {fileID: 1674709847461077908}
+  - component: {fileID: 4465325708954645180}
   m_Layer: 5
   m_Name: Arrow
   m_TagString: Untagged
@@ -86,7 +86,7 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &1674709847461077908
+--- !u!114 &4465325708954645180
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -95,17 +95,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 9117084985861791628}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d4376a2ec5f27a04b8761e46db7f46fd, type: 3}
+  m_Script: {fileID: 11500000, guid: 43490a061a8da4b49b2ba82a1c278339, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isTrashable: 1
   thisName: Arrow
-  thisDescription: A simple wooden arrow.
+  thisDescription: Arrow
   thisFunctionality: '[Used for hunting]'
-  isConsumable: 0
-  hydrationAmount: 0
-  hungerAmount: 0
-  healthAmount: 0
 --- !u!1001 &3073429116164387443
 PrefabInstance:
   m_ObjectHideFlags: 0

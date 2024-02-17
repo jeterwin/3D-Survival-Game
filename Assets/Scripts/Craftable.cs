@@ -17,6 +17,7 @@ public class NeededMaterials
 {
     public CraftingMaterials Material;
     public int AmountOfMaterial;
+    public bool RequiresCraftingTable = false;
 }
 
 public enum CraftingMaterials

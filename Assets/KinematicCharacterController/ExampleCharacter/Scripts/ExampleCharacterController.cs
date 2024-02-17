@@ -92,6 +92,7 @@ namespace KinematicCharacterController.Examples
         [SerializeField] private float stamina = 1f;
         [SerializeField] private float staminaDecay = 0.1f;
         [SerializeField] private float staminaGain = 0.1f;
+        private int fadeInParameter = Animator.StringToHash("fadesIn");
 
 
         [Header("Stable Movement")]
@@ -280,7 +281,7 @@ namespace KinematicCharacterController.Examples
                     transitionTime = FOVLerpTime;
                 }
 
-                animator.SetFloat("fadesIn", 1);
+                animator.SetFloat(fadeInParameter, 1);
                 stamina -= staminaDecay * Time.deltaTime;
                 if(stamina < 0)
                 {
@@ -300,7 +301,7 @@ namespace KinematicCharacterController.Examples
                 if(stamina >= 1)
                 {
                     stamina = 1;
-                    animator.SetFloat("fadesIn", -1);
+                    animator.SetFloat(fadeInParameter, -1);
                 }
             }
             mainCamera.fieldOfView = itemCamera.fieldOfView = Mathf.Lerp(walkingFOV, sprintingFOV, transitionTime / FOVLerpTime);

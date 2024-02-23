@@ -215,6 +215,7 @@ public class DayNNight : MonoBehaviour {
         intensity = Mathf.Clamp01(intensity);
 
         sun.intensity = intensity * sunVariation + sunBaseIntensity;
+        RenderSettings.skybox.SetFloat("_CubemapTransition", 1f - sun.intensity);
     }
 
     private void AdjustSunColor()

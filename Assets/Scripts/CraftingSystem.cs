@@ -10,6 +10,8 @@ public class CraftingSystem : MonoBehaviour
 {
     public static CraftingSystem Instance;
 
+    public bool IsAroundCraftingTable = false;
+
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip sucessfulCraft;
 
@@ -33,7 +35,7 @@ public class CraftingSystem : MonoBehaviour
     }
     private void Awake()
     {
-        if(Instance != null)
+        if(Instance == null)
         {
             Instance = this;
         }
@@ -43,15 +45,16 @@ public class CraftingSystem : MonoBehaviour
         CraftableConstructions = Resources.LoadAll<Craftable>("CraftableConstructions");
         CraftableTools = Resources.LoadAll<Craftable>("CraftableTools");
         CraftableWeapons = Resources.LoadAll<Craftable>("CraftableWeapons");
-        PopulateCraftableItems(ConstructionsGrid, CraftableConstructions);
-        PopulateCraftableItems(ToolsGrid, CraftableTools);
-        PopulateCraftableItems(WeaponsGrid, CraftableWeapons);
     }
 
     private void PopulateCraftableItems(Transform itemGrid, Craftable[] itemSet)
     {
         foreach (Craftable item in itemSet)
         {
+            //If the item needs a crafting table to be crafted and the player is NOT near
+            //one, then just return
+            if(item.RequiresCraftingTable && !IsAroundCraftingTable) { return; }
+
             //Create the slot prefab for the craftable item
             GameObject GO = Instantiate(CraftSlotPrefab);
             //Get the transform for the prefab for modifications
@@ -134,10 +137,31 @@ public class CraftingSystem : MonoBehaviour
 
     private void OpenCrafting()
     {
+        DepopulateObjects();
+        PopulateCraftableItems(ConstructionsGrid, CraftableConstructions);
+        PopulateCraftableItems(ToolsGrid, CraftableTools);
+        PopulateCraftableItems(WeaponsGrid, CraftableWeapons);
+
         craftingSystemUI.SetActive(true);
         isOpen = !isOpen;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
         ScriptManagers.Instance.inventorySystem.enabled = false;
+    }
+
+    private void DepopulateObjects()
+    {
+        foreach(Transform go in ConstructionsGrid)
+        {
+            Destroy(go.gameObject);
+        }
+        foreach(Transform go in WeaponsGrid)
+        {
+            Destroy(go.gameObject);
+        }
+        foreach(Transform go in ToolsGrid)
+        {
+            Destroy(go.gameObject);
+        }
     }
 }

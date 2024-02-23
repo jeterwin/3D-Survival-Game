@@ -14,15 +14,25 @@ public class Connector : MonoBehaviour
     [SerializeField] private bool canConnectToFloor = true;
     [SerializeField] private bool canConnectToWall = true;
 
+    private SphereCollider sphereCollider;
+
+    private void Awake()
+    {
+        sphereCollider = GetComponent<SphereCollider>();
+    }
+    private void OnValidate()
+    {
+        sphereCollider = GetComponent<SphereCollider>();
+    }
     private void OnDrawGizmos()
     {
         Gizmos.color = IsConnectedToFloor ? (IsConnectedToWall ? Color.red : Color.blue) : (!IsConnectedToWall ? Color.green : Color.yellow);
-        Gizmos.DrawWireSphere(transform.position, transform.lossyScale.x);
+        Gizmos.DrawWireSphere(transform.position, sphereCollider.radius);
     }
 
     public void UpdateConnectors(bool rootCall = false)
     {
-        Collider[] colliders = Physics.OverlapSphere(transform.position, transform.lossyScale.x);
+        Collider[] colliders = Physics.OverlapSphere(transform.position, sphereCollider.radius);
         IsConnectedToFloor = !canConnectToFloor;
         IsConnectedToWall = !canConnectToWall;
 

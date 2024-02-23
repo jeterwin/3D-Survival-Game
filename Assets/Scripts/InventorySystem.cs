@@ -6,11 +6,14 @@ using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
- 
+
+[RequireComponent(typeof(AudioSource))]
 public class InventorySystem : MonoBehaviour
 {
     #region Variables
     public static InventorySystem Instance { get; set; }
+
+    public bool IsUsingWeapon = false;
 
     [SerializeField] private List<GameObject> equippableItems;
 
@@ -32,10 +35,16 @@ public class InventorySystem : MonoBehaviour
 
     [SerializeField] private Color32 circleUnequippedColor;
 
+    [SerializeField] private GameObject itemInfoUI;
+
     private int currentEquippedSlot = 0;
     private int lastEquippedSlot = 0;
 
-    [SerializeField] private GameObject itemInfoUI;
+    [Header("Audio Settings")]
+    [SerializeField] private AudioClip pickedItemSFX;
+    [SerializeField] private AudioClip droppedItemSFX;
+    private AudioSource audioSource;
+
 
     public GameObject ItemInfoUI
     {
@@ -78,14 +87,12 @@ public class InventorySystem : MonoBehaviour
  
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-        }
-        else
+        if(Instance == null)
         {
             Instance = this;
         }
+
+        audioSource = GetComponent<AudioSource>();
     }
 
     #endregion
@@ -101,37 +108,40 @@ public class InventorySystem : MonoBehaviour
         //Preferred this over n if statements
         lastEquippedSlot = currentEquippedSlot;
 
-        for (int i = 0; i < circleImages.Length + 1; i++)
+        if(!IsUsingWeapon)
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+            for (int i = 0; i < circleImages.Length + 1; i++)
             {
-                //If Alpha1 (1) + i is at least (1) or at maximum (5) then we indeed pressed a button
-                //for our inventory slots
-                if (KeyCode.Alpha1 + i <= KeyCode.Alpha5 && KeyCode.Alpha1 + i >= KeyCode.Alpha1)
+                if (Input.GetKeyDown(KeyCode.Alpha1 + i))
                 {
-                    currentEquippedSlot = i;
+                    //If Alpha1 (1) + i is at least (1) or at maximum (5) then we indeed pressed a button
+                    //for our inventory slots
+                    if (KeyCode.Alpha1 + i <= KeyCode.Alpha5 && KeyCode.Alpha1 + i >= KeyCode.Alpha1)
+                    {
+                        currentEquippedSlot = i;
+                    }
                 }
             }
-        }
 
-        if (Input.GetAxis("Mouse ScrollWheel") > 0f)
-        {
-            if (currentEquippedSlot >= circleImages.Length - 1)
-                currentEquippedSlot = 0;
-            else
-                currentEquippedSlot += 1;
-        }
-        if (Input.GetAxis("Mouse ScrollWheel") < 0f)
-        {
-            if (currentEquippedSlot <= 0)
-                currentEquippedSlot = circleImages.Length - 1;
-            else
-                currentEquippedSlot -= 1;
-        }
+            if (Input.GetAxis("Mouse ScrollWheel") > 0f)
+            {
+                if (currentEquippedSlot >= circleImages.Length - 1)
+                    currentEquippedSlot = 0;
+                else
+                    currentEquippedSlot += 1;
+            }
+            if (Input.GetAxis("Mouse ScrollWheel") < 0f)
+            {
+                if (currentEquippedSlot <= 0)
+                    currentEquippedSlot = circleImages.Length - 1;
+                else
+                    currentEquippedSlot -= 1;
+            }
 
-        if (lastEquippedSlot != currentEquippedSlot)
-        {
-            changeEquippedSlot(currentEquippedSlot);
+            if (lastEquippedSlot != currentEquippedSlot)
+            {
+                changeEquippedSlot(currentEquippedSlot);
+            }
         }
 
         HandleInventory();
@@ -321,13 +331,9 @@ public class InventorySystem : MonoBehaviour
         whatSlotToEquip = findNextFreeSlot();
         if (whatSlotToEquip == null) return;
 
-        itemToAdd = Instantiate(Resources.Load<GameObject>(materialCopy.MaterialName),
-            Vector3.zero, whatSlotToEquip.transform.rotation);
-        //Replace the (Clone) name given to the GO at instantiation time now rather than replace it
-        //for every goddamn time that is needed
-        itemToAdd.name = itemToAdd.name.Replace("(Clone)", string.Empty);
+        replaceName(materialCopy);
 
-        if(checkForDuplicates(itemToAdd))
+        if (checkForDuplicates(itemToAdd))
         {
             materialCopy.MaterialName += "1";
         }
@@ -342,6 +348,17 @@ public class InventorySystem : MonoBehaviour
             InstantiateItem(itemSlotIndex);
         }
         itemList.Add(materialCopy);
+
+        audioSource.PlayOneShot(pickedItemSFX);
+    }
+
+    private void replaceName(MaterialStruct materialCopy)
+    {
+        itemToAdd = Instantiate(Resources.Load<GameObject>(materialCopy.MaterialName),
+            Vector3.zero, whatSlotToEquip.transform.rotation);
+        //Replace the (Clone) name given to the GO at instantiation time now rather than replace it
+        //for every goddamn time that is needed
+        itemToAdd.name = itemToAdd.name.Replace("(Clone)", string.Empty);
     }
 
     private bool checkForDuplicates(GameObject itemToAdd)

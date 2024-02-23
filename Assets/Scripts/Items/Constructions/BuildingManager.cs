@@ -17,6 +17,7 @@ public class BuildingManager : MonoBehaviour
     [Header("Build Settings")]
     public GameObject CurrentBuilding;
     public SelectedBuildType CurrentBuildType;
+    [SerializeField] private float maxBuildingDistance = 2f;
     [SerializeField] private LayerMask connectorLayer;
 
     [Header("Destroy Settings")]
@@ -99,7 +100,7 @@ public class BuildingManager : MonoBehaviour
     {
         Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        if(Physics.Raycast(ray, out hit))
+        if(Physics.Raycast(ray, out hit, maxBuildingDistance))
         {
             if(!hit.transform.root.CompareTag("Buildables"))
             {
@@ -153,7 +154,6 @@ public class BuildingManager : MonoBehaviour
             }
 
             //If we're left with items after building, continue the build mode
-            print(CurrentBuilding.name);
             InventorySystem.Instance.RemoveItem(CurrentBuilding.name, 1);
             if(InventorySystem.Instance.ReturnMaterialQuantity(CurrentBuilding.name) <= 0)
             {
@@ -171,23 +171,41 @@ public class BuildingManager : MonoBehaviour
         createGhostPrefab(CurrentBuilding);
 
         moveGhostPrefabToRaycast();
-        checkBuildValidty();
+        checkBuildValidity();
     }
 
-    private void checkBuildValidty()
+    private void checkBuildValidity()
     {
         Collider[] colliders = Physics.OverlapSphere(ghostBuildGameobject.transform.position, 
             connectorOverlapRadius, connectorLayer);
 
         if(colliders.Length > 0)
         {
-            ghostConnectBuild(colliders);
+            if(CurrentBuildType != SelectedBuildType.Generic)
+            {
+                ghostConnectBuild(colliders);
+            }
+            else
+            {
+                foreach(Connector connector in ghostBuildGameobject.GetComponentsInChildren<Connector>())
+                {
+                    checkGenericBuildValidity(connector);
+                }
+            }
         }
         else
         {
             ghostSeparateBuild();
 
             if(!isGhostInValidPosition) { return; }
+
+            if(CurrentBuildType == SelectedBuildType.Generic)
+            {
+                foreach(Connector connector in ghostBuildGameobject.GetComponentsInChildren<Connector>())
+                {
+                    checkGenericBuildValidity(connector);
+                }
+            }
 
             Collider[] overlapColliders = Physics.OverlapBox(ghostBuildGameobject.transform.position, 
                 new Vector3(2f, 2f, 2f), ghostBuildGameobject.transform.rotation);
@@ -197,8 +215,47 @@ public class BuildingManager : MonoBehaviour
                 {
                     ghostifyModel(modelParent, ghostMaterialInvalid);
                     isGhostInValidPosition = false;
+                    print("here4");
                     return;
                 }
+            }
+        }
+    }
+
+    private void checkGenericBuildValidity(Connector connector)
+    {
+        Collider[] _colliders = Physics.OverlapSphere(connector.transform.position, .3f);
+
+        //Means there are no buildables (floors) underneath so we can't place it
+        if (_colliders.Length == 0 && connector.ConnectorPosition == ConnectorPosition.Bottom)
+        {
+            ghostifyModel(modelParent, ghostMaterialInvalid);
+            print("here1");
+            isGhostInValidPosition = false;
+            return;
+        }
+
+        if (_colliders.Length >= 1 && connector.ConnectorPosition != ConnectorPosition.Bottom)
+        {
+            ghostifyModel(modelParent, ghostMaterialInvalid);
+            isGhostInValidPosition = false;
+            print("here2");
+            return;
+        }
+
+        foreach(Collider coll in _colliders)
+        {
+            if(coll.name.Contains("Connector")) { continue; }
+
+            if(!coll.CompareTag("Buildables"))
+            {
+                ghostifyModel(modelParent, ghostMaterialInvalid);
+                isGhostInValidPosition = false;
+            }
+            else
+            {
+                ghostifyModel(modelParent, ghostMaterialValid);
+                isGhostInValidPosition = true;
             }
         }
     }
@@ -207,7 +264,7 @@ public class BuildingManager : MonoBehaviour
     {
         Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        if(Physics.Raycast(ray, out hit))
+        if(Physics.Raycast(ray, out hit, maxBuildingDistance))
         {
             if(CurrentBuildType == SelectedBuildType.Wall)
             {
@@ -224,6 +281,7 @@ public class BuildingManager : MonoBehaviour
             else
             {
                 ghostifyModel(modelParent, ghostMaterialInvalid);
+                            print("here5");
                 isGhostInValidPosition = false;
             }
         }
@@ -358,7 +416,7 @@ public class BuildingManager : MonoBehaviour
     {
         Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        if(Physics.Raycast(ray, out hit))
+        if(Physics.Raycast(ray, out hit, maxBuildingDistance))
         {
             ghostBuildGameobject.transform.position = hit.point;
         }
@@ -387,5 +445,6 @@ public class BuildingManager : MonoBehaviour
 public enum SelectedBuildType
 {
     Floor,
-    Wall
+    Wall,
+    Generic
 }

@@ -155,40 +155,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09f87b4ac4fc2604abbb87276420334e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 2500
-  height: 200
+  width: 500
+  height: 500
   scale: 5
   rivers: 1
-  riverScale: 1
+  riverScale: 0.1
   noise:
   - noiseType: 0
     scale: 5
-    octaves: 2
-    persistence: 0.5
-    lacunarity: 2
+    octaves: 1
+    persistence: 1
+    lacunarity: 1
     weight: 0.5
     filters:
-    - filterType: 1
-      exponent: 2
-      step: 0
-      smoothness: 0
+    - filterType: 3
+      exponent: 1
+      step: 0.159
+      smoothness: 0.86
       threshold: 0
       power: 0
   - noiseType: 1
-    scale: 2
+    scale: 5
     octaves: 2
-    persistence: 0.5
-    lacunarity: 2
+    persistence: 1
+    lacunarity: 1
     weight: 1
     filters:
-    - filterType: 1
-      exponent: 2
-      step: 0
-      smoothness: 0
+    - filterType: 3
+      exponent: 1
+      step: 0.223
+      smoothness: 1.176
       threshold: 0
       power: 0
-  beachHeight: 0.35
-  seed: 0
+  beachHeight: 0.101
+  seed: 44880.45
   prefabs: []
   detailTextures: []
   spawnPrefabs: 0
@@ -380,7 +380,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1482664760}
   - component: {fileID: 1482664759}
-  - component: {fileID: 1482664761}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -465,29 +464,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!114 &1482664761
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1482664758}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Version: 3
-  m_UsePipelineSettings: 1
-  m_AdditionalLightsShadowResolutionTier: 2
-  m_LightLayerMask: 1
-  m_RenderingLayers: 1
-  m_CustomShadowLayers: 0
-  m_ShadowLayerMask: 1
-  m_ShadowRenderingLayers: 1
-  m_LightCookieSize: {x: 1, y: 1}
-  m_LightCookieOffset: {x: 0, y: 0}
-  m_SoftShadowQuality: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

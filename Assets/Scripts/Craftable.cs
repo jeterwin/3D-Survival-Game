@@ -10,6 +10,8 @@ public class Craftable : ScriptableObject
     public List<NeededMaterials> MaterialsNeeded = new List<NeededMaterials>();
 
     public Sprite ItemImage;
+
+    public bool RequiresCraftingTable = false;
 }
 
 [Serializable]
@@ -17,7 +19,6 @@ public class NeededMaterials
 {
     public CraftingMaterials Material;
     public int AmountOfMaterial;
-    public bool RequiresCraftingTable = false;
 }
 
 public enum CraftingMaterials

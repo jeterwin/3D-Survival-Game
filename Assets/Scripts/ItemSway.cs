@@ -36,6 +36,8 @@ public class ItemSway : MonoBehaviour
 
     void Update()
     {
+        if(InventorySystem.Instance.IsOpen || CraftingSystem.Instance.IsOpen) { return; }
+
         GetInput();
 
         Sway();

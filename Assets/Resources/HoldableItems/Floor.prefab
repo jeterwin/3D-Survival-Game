@@ -235,7 +235,7 @@ GameObject:
   - component: {fileID: 1195034262494077081}
   m_Layer: 0
   m_Name: EA03_Village_Hut_Foundation_02b_LOD0
-  m_TagString: Untagged
+  m_TagString: Buildables
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -339,7 +339,7 @@ GameObject:
   - component: {fileID: 3736159940084536227}
   m_Layer: 0
   m_Name: EA03_Village_Hut_Foundation_02b_LOD1
-  m_TagString: Untagged
+  m_TagString: Buildables
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -831,7 +831,7 @@ GameObject:
   - component: {fileID: 5448458761678025036}
   m_Layer: 0
   m_Name: EA03_Village_Hut_Foundation_02b_LOD2
-  m_TagString: Untagged
+  m_TagString: Buildables
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

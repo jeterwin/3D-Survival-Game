@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7822026681926170628}
   - component: {fileID: 8697320552415717028}
   - component: {fileID: 5739080758455519330}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: EA03_Wooden_Pin_01b_LOD3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -94,7 +94,7 @@ GameObject:
   - component: {fileID: 513536821663432149}
   - component: {fileID: 3951130940125110449}
   - component: {fileID: 8613861618216690929}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: EA03_Wooden_Pin_01b_LOD0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -179,7 +179,7 @@ GameObject:
   - component: {fileID: 121181970706704554}
   - component: {fileID: 8167885276528780614}
   - component: {fileID: 2214231207818139481}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: Wood
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -265,7 +265,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4680757731160225450}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 3
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -312,7 +312,7 @@ GameObject:
   - component: {fileID: 8691875230091608694}
   - component: {fileID: 7603579836946099671}
   - component: {fileID: 547098974536937000}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: EA03_Wooden_Pin_01b_LOD2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -395,7 +395,7 @@ GameObject:
   - component: {fileID: 9139095005704405833}
   - component: {fileID: 8483264096249467015}
   - component: {fileID: 791326856846398728}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: EA03_Wooden_Pin_01b_LOD1
   m_TagString: Untagged
   m_Icon: {fileID: 0}

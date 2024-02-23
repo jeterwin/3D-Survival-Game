@@ -8,13 +8,14 @@ public class AxeItem : UtilityItem
     public int TreeDamage
     {
         get { return  treeDamage; } 
-    } 
+    }
+
+    public override void AnimationEvent_DisableCollider()
+    {
+        MeshCollider.enabled = false;
+    }
     public override void AnimationEvent_EnableCollider()
     {
         MeshCollider.enabled = true;
-    }
-    private void AnimationEvent_DisableCollider()
-    {
-        MeshCollider.enabled = false;
     }
 }

@@ -8,7 +8,6 @@ public class CharacterMovement : MonoBehaviour
 {
 	[Header("Player")]
 	[SerializeField] private Rigidbody rb;
-	[SerializeField] private float maxSpeed = 5;
 	[Tooltip("Move speed of the character in m/s")]
 	public float MoveSpeed = 4.0f;
 

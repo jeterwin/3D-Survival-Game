@@ -7,6 +7,7 @@ public class ScriptManagers : MonoBehaviour
     public static ScriptManagers Instance;
     public InventorySystem inventorySystem;
     public CraftingSystem craftingSystem;
+    public AudioSource itemAudioSource;
 
     private void Awake()
     {

@@ -1,13 +1,13 @@
 using System;
 using UnityEngine;
 
-[RequireComponent(typeof(AudioSource))]
 public abstract class UtilityItem : MonoBehaviour
 {
     public UsableItem item;
 
     [SerializeField] private AudioClip swingSFX;
     [SerializeField] private AudioClip hitSFX;
+    [SerializeField] private AudioClip destroyedItemSFX;
 
     [SerializeField] private GameObject particlesHitSFX;
 
@@ -36,22 +36,29 @@ public abstract class UtilityItem : MonoBehaviour
     }
 
     [SerializeField] private int selfDamagePerHit = 0;
-
-    [SerializeField] private int enemyDamage = 0;
     public int SelfDamagerPerHit
     {
         get { return selfDamagePerHit; } 
     }
 
+    [SerializeField] private int enemyDamage = 0;
+
+    public int EnemyDamage
+    {
+        get { return enemyDamage; }
+    }
+
     [SerializeField] private Animator animator;
 
-    private void Awake()
+    private void Start()
     {
-        audioSource = GetComponent<AudioSource>();
+        audioSource = ScriptManagers.Instance.itemAudioSource;
     }
 
     private void Update()
     {
+        if(InventorySystem.Instance.IsOpen || CraftingSystem.Instance.IsOpen) { return; }
+
         if(Input.GetKeyDown(KeyCode.Mouse0) && !animator.GetCurrentAnimatorStateInfo(0).IsName("Swing"))
         {
             SetBool();
@@ -62,13 +69,15 @@ public abstract class UtilityItem : MonoBehaviour
     private void SetBool()
     {
         animator.SetBool(triggerName, true);
+        InventorySystem.Instance.IsUsingWeapon = true;
     }
-    private void AnimationEvent_ResetTrigger()
+    public void AnimationEvent_ResetTrigger()
     {
         animator.SetBool(triggerName, false);
+        InventorySystem.Instance.IsUsingWeapon = false;
     }
     public abstract void AnimationEvent_EnableCollider();
-
+    public abstract void AnimationEvent_DisableCollider();
     public void TakeDamage(int damage)
     {
         audioSource.PlayOneShot(hitSFX);
@@ -79,7 +88,9 @@ public abstract class UtilityItem : MonoBehaviour
 
         if(itemDurability <= 0)
         {
+            audioSource.PlayOneShot(destroyedItemSFX);
             InventorySystem.Instance.RemoveItem(transform.name, 1);
+            InventorySystem.Instance.IsUsingWeapon = false;
         }
     }
 }

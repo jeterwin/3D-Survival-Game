@@ -12,7 +12,7 @@ public class HealthSystem : MonoBehaviour
 
 	[Space(5)]
 	[Header("Warmness Stats")]
-	public bool isAroundHot = false;
+	public bool IsAroundHot = false;
 
 	[SerializeField] private Material freezeMaterial;
     [SerializeField] private float freezeNormIntensity = 0.5f;
@@ -46,7 +46,6 @@ public class HealthSystem : MonoBehaviour
 	[SerializeField] private float healthPoints = 100f;
 	[SerializeField] private float maxHitPoints = 100f;
 	[SerializeField] private float healthReduction = 1f;
-	[SerializeField] private float healthDecreaseTime = 1f;
 
 	[Space(5)]
 	[Header("Hydration Stats")]
@@ -96,7 +95,7 @@ public class HealthSystem : MonoBehaviour
 
 		if(warmnessTimer <= 0)
 		{
-			if(!isAroundHot)
+			if(!IsAroundHot)
 			{
 				ReduceWarmness(warmnessDecreaseAmount);
 			}

@@ -8,7 +8,10 @@ public class HealthAI : MonoBehaviour
 {
     [Header("Health Stats")]
     [SerializeField] private float currentHealth = 0;
+    public float CurrentHealth { get { return currentHealth; } set { currentHealth = value; } }
+
     [SerializeField] private float maxHealth = 100f;
+    public float MaxHealth { get { return maxHealth; } set { maxHealth = value; } } 
 
     [Header("Damage Status")]
     [SerializeField] private float coloredTimer = 0.1f;
@@ -21,12 +24,16 @@ public class HealthAI : MonoBehaviour
 
     private List<Material> materials = new();
 
+    private BasicAI AI;
+
     private void Awake()
     {
         foreach(Transform child in transform)
         {
             materials.Add(child.GetComponent<MeshRenderer>().materials[0]);
         }
+
+        AI = GetComponent<BasicAI>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -43,10 +50,12 @@ public class HealthAI : MonoBehaviour
     }
     public void TakeDamage(int damage)
     {
+        AI.SetState(AIState.Fleeing);
+
         currentHealth -= damage;
         if(currentHealth <= 0)
         {
-            StartCoroutine(despawn());
+            despawn();
         }
         StartCoroutine(tookDamage());
     }
@@ -65,14 +74,8 @@ public class HealthAI : MonoBehaviour
             mat.color = normalColor;
         }
     }
-    private IEnumerator despawn()
+    private void despawn()
     {
-        //Destroy(GetComponent<NavMeshAgent>());
-        //gameObject.SetActive(false);
-        GetComponent<Rigidbody>().isKinematic = true;
-
-        yield return new WaitForSeconds(0.02f);
-
         foreach(Item item in itemsToGive)
         {
             Instantiate(item, transform.position, transform.rotation);

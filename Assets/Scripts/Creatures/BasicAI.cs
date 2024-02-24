@@ -14,10 +14,14 @@ public class BasicAI : MonoBehaviour
     private int idleAnim;
     private int movingAnim;
     
+    [Header("Fleeing")]
+    [SerializeField] private float fleeingSpeed = 4f;
+    [SerializeField] private float fleeingDistance = 35f;
+    [SerializeField] private float maxFleeingTime = 5f;
 
     [Header("Wander")]
     [SerializeField] private float wanderDistance = 25f;
-    [SerializeField] private float walkSpeed = 1f;
+    [SerializeField] private float walkSpeed = 2f;
     [SerializeField] private float maxWalkTime = 6f;
 
     [Header("Idle")]
@@ -39,27 +43,85 @@ public class BasicAI : MonoBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
         navMeshAgent.speed = walkSpeed;
 
-        currentState = AIState.Idle;
+        SetState(AIState.Idle);
         UpdateState();
     }
 
-    protected virtual void UpdateState()
+    public void UpdateState()
     {
         switch(currentState)
         {
             case AIState.Idle:
-                HandleIdleState();
+                handleIdleState();
                 animator.Play(idleAnim);
                 break;
 
             case AIState.Moving:
-                HandleMovingState();
+                handleMovingState();
+                animator.Play(movingAnim);
+                break;
+
+            case AIState.Fleeing:
+                handleFleeingState();
+                animator.Play(movingAnim);
+                break;
+
+            case AIState.Breeding:
+                handleBreedingState();
                 animator.Play(movingAnim);
                 break;
         }
     }
 
-    protected virtual void HandleMovingState()
+    private void handleBreedingState()
+    {
+        StartCoroutine(startBreeding());
+    }
+    private IEnumerator startBreeding()
+    {
+        navMeshAgent.speed = walkSpeed;
+
+        while(navMeshAgent.pathPending || navMeshAgent.remainingDistance > navMeshAgent.stoppingDistance)
+        {
+            yield return null;
+        }
+
+        SetState(AIState.Idle);
+    }
+    protected virtual void handleFleeingState()
+    {
+        //We don't want our idle / moving coroutines to mess up our fleeing state since we can be hit
+        //while moving or while being idle
+        StopAllCoroutines();
+
+        StartCoroutine(startFleeing());
+    }
+
+    private IEnumerator startFleeing()
+    {
+        float startTime = Time.time;
+
+        navMeshAgent.speed = fleeingSpeed;
+
+        Vector3 randomDestionation = getRandomPoint(transform.position, fleeingDistance);
+        navMeshAgent.SetDestination(randomDestionation);
+
+        while(navMeshAgent.pathPending || navMeshAgent.remainingDistance > navMeshAgent.stoppingDistance)
+        {
+            if(Time.time - startTime >= maxFleeingTime)
+            {
+                navMeshAgent.ResetPath();
+                SetState(AIState.Idle);
+                yield break;
+            }
+
+            yield return null;
+        }
+
+        SetState(AIState.Idle);
+    }
+
+    protected virtual void handleMovingState()
     {
         StartCoroutine(waitToStartDestination());
     }
@@ -73,16 +135,16 @@ public class BasicAI : MonoBehaviour
             if(Time.time - startTime >= maxWalkTime)
             {
                 navMeshAgent.ResetPath();
-                setState(AIState.Idle);
+                SetState(AIState.Idle);
                 yield break;
             }
 
             yield return null;
         }
 
-        setState(AIState.Idle);
+        SetState(AIState.Idle);
     }
-    protected void setState(AIState state)
+    public void SetState(AIState state)
     {
         if(state == currentState) { return; }
 
@@ -90,18 +152,20 @@ public class BasicAI : MonoBehaviour
         UpdateState();
     }
 
-    protected virtual void HandleIdleState()
+    protected virtual void handleIdleState()
     {
         StartCoroutine(waitToMove());
     }
 
     private IEnumerator waitToMove()
     {
+        navMeshAgent.speed = walkSpeed;
+
         yield return new WaitForSeconds(UnityEngine.Random.Range(idleTime / 2f, idleTime * 2f));
 
         Vector3 randomDestionation = getRandomPoint(transform.position, wanderDistance);
         navMeshAgent.SetDestination(randomDestionation);
-        setState(AIState.Moving);
+        SetState(AIState.Moving);
     }
 
     protected Vector3 getRandomPoint(Vector3 origin, float distance)
@@ -124,5 +188,7 @@ public class BasicAI : MonoBehaviour
 public enum AIState
 {
     Idle,
-    Moving
+    Moving,
+    Fleeing,
+    Breeding
 }

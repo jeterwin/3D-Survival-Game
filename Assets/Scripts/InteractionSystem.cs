@@ -10,7 +10,10 @@ public class InteractionSystem : MonoBehaviour
 
     [Header("Raycast Settings")]
     [SerializeField] private Camera mainCamera;
+    public Camera Camera { get { return mainCamera; } }
+
     [SerializeField] private float rayLength = 1f;
+    public float RayLength { get { return rayLength; }}
 
     [SerializeField] private Image crosshair;
     [SerializeField] private Sprite defaultCrosshair;

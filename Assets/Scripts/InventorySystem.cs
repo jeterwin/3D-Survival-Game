@@ -38,6 +38,8 @@ public class InventorySystem : MonoBehaviour
     [SerializeField] private GameObject itemInfoUI;
 
     private int currentEquippedSlot = 0;
+    public int CurrentEquippedSlot { get { return currentEquippedSlot; } }
+
     private int lastEquippedSlot = 0;
 
     [Header("Audio Settings")]

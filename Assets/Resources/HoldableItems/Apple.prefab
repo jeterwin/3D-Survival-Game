@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 858723483121286536}
   - component: {fileID: 832139879032820378}
   - component: {fileID: 841703140996179688}
-  m_Layer: 0
-  m_Name: EA03_Items_House_Apple_01a__PRE
+  m_Layer: 3
+  m_Name: Apple
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
